@@ -17,8 +17,8 @@
     "env-local": "cp ./.env.local-dev ./.env && cp ./.env ./.dev.vars",
     "env-deploy": "cp ./.env.deployment ./.env && cp ./.env ./.dev.vars",
     "pages:build": "npx @cloudflare/next-on-pages && npm run db:migrate:local",
-    "pages:preview": "npm run env-local && npx @cloudflare/next-on-pages && npm run db:migrate:local && wrangler pages dev",
-    "pages:deploy": "npm run env-deploy && npm run setup && cross-env NEXT_PUBLIC_BETTER_AUTH_URL='https://kedai.madtofan.win' NODE_ENV='production' NEXT_PUBLIC_APP_ENV='production' NEXT_PUBLIC_LOCAL_DB='' npm run pages:build && wrangler pages deploy",
+    "pages:preview": "npm run env-local && npm run pages:build && wrangler pages dev",
+    "pages:deploy": "npm run env-deploy && npm run setup && wrangler pages deploy",
     "pages:log": "wrangler pages deployment tail --project-name kedai"
   },
   "dependencies": {
