@@ -37,7 +37,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "~/components/ui/sheet";
-import { Dialog, DialogContent } from "~/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import { Spinner } from "~/components/ui/spinner";
 import {
   Card,
@@ -49,6 +54,7 @@ import {
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
 import { type RouterInputs } from "~/server/api/root";
+import { betterFetch } from "@better-fetch/fetch";
 
 const formSchema = z.object({
   menuGroupId: z.coerce.number().positive(),
@@ -94,6 +100,7 @@ export default function DashboardMenuPage() {
   const [resetImage, setResetImage] = useState(true);
   const [imageFile, setImageFile] = useState<File>();
   const [loadingImage, setLoadingImage] = useState(false);
+  const [loadingAddMenu, setLoadingAddMenu] = useState(false);
 
   useEffect(() => {
     if (
@@ -139,10 +146,11 @@ export default function DashboardMenuPage() {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    setLoadingAddMenu(true);
     let menuDetails: RouterInputs["menu"]["addMenu"] = {
       menuGroupId: values.menuGroupId,
       name: values.name,
-      description: values.description,
+      description: values.description ?? "",
       sale: values.sale,
       cost: values.cost,
     };
@@ -155,7 +163,7 @@ export default function DashboardMenuPage() {
     addMenu(menuDetails)
       .then(async (uploadUrl) => {
         if (uploadUrl && imageFile && values.image?.fileType) {
-          fetch(uploadUrl, {
+          betterFetch(uploadUrl, {
             method: "PUT",
             headers: {
               "Content-Type": values.image?.fileType,
@@ -184,10 +192,15 @@ export default function DashboardMenuPage() {
           description: error.message,
           variant: "destructive",
         });
-      });
+      })
+      .finally(() => setLoadingAddMenu(false));
   };
 
-  const onDeleteItem = (menuId: number) => {
+  const onDeleteItem = (
+    menuId: number,
+    setDeleteLoading: (load: boolean) => void,
+  ) => {
+    setDeleteLoading(true);
     deleteMenu({
       id: menuId,
     })
@@ -204,11 +217,12 @@ export default function DashboardMenuPage() {
           description: error.message,
           variant: "destructive",
         });
-      });
+      })
+      .finally(() => setDeleteLoading(false));
   };
 
   const renderMenus = () => {
-    if (loadingMenus) {
+    if (!organizationMenus && loadingMenus) {
       return (
         <div className="flex flex-wrap gap-4">
           <Skeleton className="min-w-[600px] max-w-[800px] flex-grow bg-sidebar" />
@@ -257,7 +271,9 @@ export default function DashboardMenuPage() {
         <SheetContent className="bg-sidebar">
           <SheetHeader>
             <SheetTitle>Add New Menu Item</SheetTitle>
-            <SheetDescription>asd</SheetDescription>
+            <SheetDescription className="hidden">
+              Sheet to display add menu form
+            </SheetDescription>
           </SheetHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
@@ -310,7 +326,7 @@ export default function DashboardMenuPage() {
                                 imageCompression(file, {
                                   maxSizeMB: 1,
                                   maxWidthOrHeight: 1920,
-                                  useWebWorker: true,
+                                  useWebWorker: false,
                                 })
                                   .then((compressedFile) => {
                                     const previewUrl =
@@ -434,8 +450,12 @@ export default function DashboardMenuPage() {
               />
               <div className="flex items-end"></div>
               <SheetFooter>
-                <Button type="submit">
-                  <Plus className="mr-2 h-4 w-4" />
+                <Button type="submit" disabled={loadingAddMenu}>
+                  {loadingAddMenu ? (
+                    <Spinner />
+                  ) : (
+                    <Plus className="mr-2 h-4 w-4" />
+                  )}
                   Add Item
                 </Button>
               </SheetFooter>
@@ -448,6 +468,10 @@ export default function DashboardMenuPage() {
         {renderMenus()}
       </ScrollArea>
       <Dialog open={loadingImage}>
+        <DialogTitle className="hidden">System</DialogTitle>
+        <DialogDescription className="hidden">
+          Loading Image Dialog when user selects a new image
+        </DialogDescription>
         <DialogContent
           disableClose={true}
           className="flex max-w-60 flex-row place-content-center items-center"
@@ -460,18 +484,22 @@ export default function DashboardMenuPage() {
   );
 }
 
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 1;
 
 function MenuItem({
   menu,
   onDeleteItem,
 }: {
   menu: Menu;
-  onDeleteItem: (itemId: number) => void;
+  onDeleteItem: (
+    itemId: number,
+    setDeleteLoading: (load: boolean) => void,
+  ) => void;
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [image, setImage] = useState(menu.image);
   const [retries, setRetries] = useState(0);
+  const [deleteItemLoading, setDeleteItemLoading] = useState(false);
 
   const renderImage = () => {
     if (!image) {
@@ -518,9 +546,10 @@ function MenuItem({
           <Button
             variant="destructive"
             size="sm"
-            onClick={() => onDeleteItem(menu.id)}
+            onClick={() => onDeleteItem(menu.id, setDeleteItemLoading)}
+            disabled={deleteItemLoading}
           >
-            <Trash className="h-4 w-4" />
+            {deleteItemLoading ? <Spinner /> : <Trash className="h-4 w-4" />}
           </Button>
         </div>
       </CardHeader>

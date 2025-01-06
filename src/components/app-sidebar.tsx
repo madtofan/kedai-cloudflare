@@ -23,10 +23,14 @@ import {
 import { useEffect, useMemo } from "react";
 import { NavUser } from "./nav-user";
 import Link from "next/link";
-// import { type RouterOutputs } from "~/server/api/root";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "./ui/dialog";
 import { Spinner } from "./ui/spinner";
 
 const data = {
@@ -142,6 +146,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {userDetails && <NavUser user={userDetails} />}
       </SidebarFooter>
       <Dialog open={!stores && !userDetails && isLoading}>
+        <DialogTitle className="hidden">System</DialogTitle>
+        <DialogDescription className="hidden">
+          Loading user details dialog
+        </DialogDescription>
         <DialogContent
           disableClose={true}
           className="flex flex-row place-content-center items-center"

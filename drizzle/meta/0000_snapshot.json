@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "ea344d76-471d-4af1-80fa-72f63a4edb64",
+  "id": "35f7a0c7-3817-4eca-bdb5-731a29782be8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -1185,8 +1185,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "storeSlug": {
-          "name": "storeSlug",
+        "storeId": {
+          "name": "storeId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -1219,21 +1219,21 @@
         "menuStoreIdx": {
           "name": "menuStoreIdx",
           "columns": [
-            "storeSlug"
+            "storeId"
           ],
           "isUnique": false
         }
       },
       "foreignKeys": {
-        "storeMenus_storeSlug_stores_slug_fk": {
-          "name": "storeMenus_storeSlug_stores_slug_fk",
+        "storeMenus_storeId_stores_id_fk": {
+          "name": "storeMenus_storeId_stores_id_fk",
           "tableFrom": "storeMenus",
           "tableTo": "stores",
           "columnsFrom": [
-            "storeSlug"
+            "storeId"
           ],
           "columnsTo": [
-            "slug"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"

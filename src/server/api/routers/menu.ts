@@ -74,7 +74,7 @@ const menuRouter = createTRPCRouter({
             message: "Image type not supported.",
           });
         }
-        const objectKey = `${ctx.organizationId}/${nanoid()}`;
+        const objectKey = `${env.NODE_ENV}/${ctx.organizationId}/${nanoid()}`;
         const cmd = new PutObjectCommand({
           Bucket: env.CLOUDFLARE_R2_BUCKET_NAME,
           Key: objectKey,
@@ -89,7 +89,7 @@ const menuRouter = createTRPCRouter({
           .insert(menuDetails)
           .values({
             name: input.name,
-            description: input.description,
+            description: input.description ?? "",
             image,
             sale: input.sale,
             cost: input.cost,

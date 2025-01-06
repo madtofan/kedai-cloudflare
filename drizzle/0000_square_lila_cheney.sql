@@ -163,11 +163,11 @@ CREATE TABLE `session` (
 --> statement-breakpoint
 CREATE TABLE `storeMenus` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`storeSlug` text NOT NULL,
+	`storeId` text NOT NULL,
 	`menuId` integer NOT NULL,
 	`createdAt` integer DEFAULT (unixepoch()) NOT NULL,
 	`updatedAt` integer,
-	FOREIGN KEY (`storeSlug`) REFERENCES `stores`(`slug`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`storeId`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`menuId`) REFERENCES `menus`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -210,7 +210,7 @@ CREATE UNIQUE INDEX `organization_slug_unique` ON `organization` (`slug`);--> st
 CREATE INDEX `roleOrganizationIdx` ON `permissionGroups` (`organizationId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `permissions_name_unique` ON `permissions` (`name`);--> statement-breakpoint
 CREATE UNIQUE INDEX `session_token_unique` ON `session` (`token`);--> statement-breakpoint
-CREATE INDEX `menuStoreIdx` ON `storeMenus` (`storeSlug`);--> statement-breakpoint
+CREATE INDEX `menuStoreIdx` ON `storeMenus` (`storeId`);--> statement-breakpoint
 CREATE INDEX `storeOrganizationIdx` ON `stores` (`organizationId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `stores_organizationId_slug_unique` ON `stores` (`organizationId`,`slug`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);

@@ -153,7 +153,7 @@ const storeRouter = createTRPCRouter({
         storeMenus: {
           columns: {
             id: false,
-            storeSlug: false,
+            storeId: false,
             menuId: false,
             createdAt: false,
             updatedAt: false,
@@ -186,12 +186,28 @@ const storeRouter = createTRPCRouter({
     .input(
       z.object({
         storeSlug: z.string().trim().min(1).max(256),
+        organizationSlug: z.string().trim().min(1).max(256),
       }),
     )
     .query(async ({ ctx, input }) => {
+      const organization = await ctx.db.query.organization.findFirst({
+        columns: { id: true },
+        where: (organization, { eq }) =>
+          eq(organization.slug, input.organizationSlug),
+      });
+      if (!organization) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Unable to find organization.",
+        });
+      }
       const storeMenus = await ctx.db.query.stores.findFirst({
         columns: { name: true },
-        where: (store, { eq }) => eq(store.slug, input.storeSlug),
+        where: (store, { and, eq }) =>
+          and(
+            eq(store.slug, input.storeSlug),
+            eq(store.organizationId, organization.id),
+          ),
         with: {
           storeMenus: {
             columns: {

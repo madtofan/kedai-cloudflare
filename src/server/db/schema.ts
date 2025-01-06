@@ -373,8 +373,8 @@ export const storeMenus = createTable(
   "storeMenus",
   {
     id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    storeSlug: text("storeSlug")
-      .references(() => stores.slug, { onDelete: "cascade" })
+    storeId: text("storeId")
+      .references(() => stores.id, { onDelete: "cascade" })
       .notNull(),
     menuId: integer("menuId")
       .references(() => menus.id, { onDelete: "cascade" })
@@ -387,13 +387,13 @@ export const storeMenus = createTable(
     ),
   },
   (example) => ({
-    storeIndex: index("menuStoreIdx").on(example.storeSlug),
+    storeIndex: index("menuStoreIdx").on(example.storeId),
   }),
 );
 export const storeMenusRelations = relations(storeMenus, ({ one }) => ({
   store: one(stores, {
-    fields: [storeMenus.storeSlug],
-    references: [stores.slug],
+    fields: [storeMenus.storeId],
+    references: [stores.id],
   }),
   menu: one(menus, {
     fields: [storeMenus.menuId],
