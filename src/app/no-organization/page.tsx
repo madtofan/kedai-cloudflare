@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Plus, Check, X, LogOut } from "lucide-react";
-import { useToast } from "~/lib/use-toast";
 import { api } from "~/trpc/react";
 import { type TRPCError } from "@trpc/server";
 import {
@@ -30,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { useToast } from "~/hooks/use-toast";
 
 const formSchema = z.object({
   organizationName: z.string().min(1),

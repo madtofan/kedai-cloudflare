@@ -13,7 +13,6 @@ import {
 import { api } from "~/trpc/react";
 import { useMemo, useState } from "react";
 import { Spinner } from "~/components/ui/spinner";
-import { useToast } from "~/lib/use-toast";
 import { type TRPCError } from "@trpc/server";
 import ConfirmationDialog from "~/components/confirmation-dialog";
 import {
@@ -22,6 +21,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { Input } from "~/components/ui/input";
+import { useToast } from "~/hooks/use-toast";
 
 export default function DashboardOrganization() {
   const [inviteUserEmail, setInviteUserEmail] = useState("");

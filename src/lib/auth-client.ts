@@ -1,7 +1,7 @@
 import { createAuthClient } from "better-auth/react";
-import { toast } from "./use-toast";
 import { organizationClient, oneTapClient } from "better-auth/client/plugins";
 import { env } from "~/env";
+import { toast } from "~/hooks/use-toast";
 
 export const client = createAuthClient({
   baseURL: env.NEXT_PUBLIC_BETTER_AUTH_URL,

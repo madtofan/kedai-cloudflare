@@ -26,7 +26,6 @@ import Image from "next/image";
 import { api } from "~/trpc/react";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "~/lib/use-toast";
 import { type TRPCError } from "@trpc/server";
 import {
   Sheet,
@@ -61,6 +60,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { useToast } from "~/hooks/use-toast";
 
 const formSchema = z.object({
   menuGroupId: z.coerce.number().positive(),
@@ -230,7 +230,11 @@ export default function DashboardMenuPage() {
           title: "Removed menu",
           description: "You have successfully removed the menu.",
         });
-        await utils.menu.getMenu.invalidate();
+        Promise.allSettled([
+          utils.menu.getMenu.invalidate(),
+          utils.store.getStoreMenus.invalidate(),
+          utils.store.getAllStoreWithMenu.invalidate(),
+        ]);
       })
       .catch((error: TRPCError) => {
         toast({

@@ -16,7 +16,6 @@ import { useState } from "react";
 import { client } from "~/lib/auth-client";
 import Image from "next/image";
 import { Loader2, X } from "lucide-react";
-import { useToast } from "~/lib/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +27,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { useToast } from "~/hooks/use-toast";
 
 const formSchema = z
   .object({

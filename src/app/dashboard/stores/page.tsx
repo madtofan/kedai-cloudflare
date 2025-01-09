@@ -5,7 +5,6 @@ import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "~/lib/use-toast";
 import { type TRPCError } from "@trpc/server";
 import {
   Card,
@@ -22,6 +21,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { type RouterInputs } from "~/server/api/root";
+import { useToast } from "~/hooks/use-toast";
 
 interface StoreData {
   createdAt: Date;

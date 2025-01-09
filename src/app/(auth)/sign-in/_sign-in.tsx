@@ -15,7 +15,6 @@ import { Input } from "~/components/ui/input";
 import { Checkbox } from "~/components/ui/checkbox";
 import { PasswordInput } from "~/components/ui/password-input";
 import { signIn, oneTap } from "~/lib/auth-client";
-import { useToast } from "~/lib/use-toast";
 import {
   Form,
   FormControl,
@@ -28,6 +27,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type ErrorContext } from "@better-fetch/fetch";
+import { useToast } from "~/hooks/use-toast";
 
 const formSchema = z.object({
   email: z.string().email(),

@@ -28,9 +28,9 @@ import {
   useSidebar,
 } from "~/components/ui/sidebar";
 import { client } from "~/lib/auth-client";
-import { useToast } from "~/lib/use-toast";
 import { Spinner } from "./ui/spinner";
 import { type RouterOutputs } from "~/server/api/root";
+import { useToast } from "~/hooks/use-toast";
 
 export function NavUser({
   user,
