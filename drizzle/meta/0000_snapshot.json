@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "35f7a0c7-3817-4eca-bdb5-731a29782be8",
+  "id": "6059ce01-4aba-4874-9265-ed4c8bd00e6d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -805,8 +805,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "storeSlug": {
-          "name": "storeSlug",
+        "storeId": {
+          "name": "storeId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -860,21 +860,21 @@
         "orderStoreIdx": {
           "name": "orderStoreIdx",
           "columns": [
-            "storeSlug"
+            "storeId"
           ],
           "isUnique": false
         }
       },
       "foreignKeys": {
-        "orders_storeSlug_stores_slug_fk": {
-          "name": "orders_storeSlug_stores_slug_fk",
+        "orders_storeId_stores_id_fk": {
+          "name": "orders_storeId_stores_id_fk",
           "tableFrom": "orders",
           "tableTo": "stores",
           "columnsFrom": [
-            "storeSlug"
+            "storeId"
           ],
           "columnsTo": [
-            "slug"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -1260,10 +1260,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "name": {
           "name": "name",

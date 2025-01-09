@@ -26,7 +26,7 @@ import { type RouterInputs } from "~/server/api/root";
 interface StoreData {
   createdAt: Date;
   updatedAt: Date | null;
-  id: number;
+  id: string;
   name: string;
   isOpen: boolean | null;
   slug: string;
@@ -41,9 +41,9 @@ export default function DashboardStorePage() {
   const {
     data,
     error: storeDataError,
-    refetch: refetchStore,
     isFetching: fetchingStores,
   } = api.store.getAllStoreWithMenu.useQuery();
+  const utils = api.useUtils();
 
   const { mutateAsync: addStore } = api.store.addStore.useMutation();
 
@@ -78,7 +78,7 @@ export default function DashboardStorePage() {
         });
         setNewStoreName("");
         setPopoverOpen(false);
-        await refetchStore();
+        await utils.store.invalidate();
       })
       .catch((error: TRPCError) => {
         toast({
@@ -89,16 +89,14 @@ export default function DashboardStorePage() {
       });
   };
 
-  const onDeleteStore = (storeId: number) => {
-    deleteStore({
-      id: storeId,
-    })
+  const onDeleteStore = (storeId: string) => {
+    deleteStore({ id: storeId })
       .then(async () => {
         toast({
           title: "Removed store",
           description: "You have successfully removed the store.",
         });
-        await refetchStore();
+        await utils.store.invalidate();
       })
       .catch((error: TRPCError) => {
         toast({
@@ -175,7 +173,7 @@ function Store({
   onDeleteStore,
 }: {
   storeData: StoreData;
-  onDeleteStore: (storeId: number) => void;
+  onDeleteStore: (storeId: string) => void;
 }) {
   return (
     <Card className="min-w-[600px] max-w-[800px] flex-grow bg-sidebar">

@@ -110,14 +110,14 @@ CREATE TABLE `orderItems` (
 --> statement-breakpoint
 CREATE TABLE `orders` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`storeSlug` text NOT NULL,
+	`storeId` text NOT NULL,
 	`tableName` text NOT NULL,
 	`completedAt` integer,
 	`completedValue` real,
 	`remarks` text,
 	`createdAt` integer DEFAULT (unixepoch()) NOT NULL,
 	`updatedAt` integer,
-	FOREIGN KEY (`storeSlug`) REFERENCES `stores`(`slug`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`storeId`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `organization` (
@@ -172,7 +172,7 @@ CREATE TABLE `storeMenus` (
 );
 --> statement-breakpoint
 CREATE TABLE `stores` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`isOpen` integer DEFAULT false,
 	`slug` text NOT NULL,
@@ -205,7 +205,7 @@ CREATE INDEX `menuNameIndex` ON `menuDetails` (`name`);--> statement-breakpoint
 CREATE INDEX `menuGroupOrganizationIdx` ON `menuGroups` (`organizationId`);--> statement-breakpoint
 CREATE INDEX `menuGroupIdx` ON `menus` (`menuGroupId`);--> statement-breakpoint
 CREATE INDEX `itemOrderIdx` ON `orderItems` (`orderId`);--> statement-breakpoint
-CREATE INDEX `orderStoreIdx` ON `orders` (`storeSlug`);--> statement-breakpoint
+CREATE INDEX `orderStoreIdx` ON `orders` (`storeId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `organization_slug_unique` ON `organization` (`slug`);--> statement-breakpoint
 CREATE INDEX `roleOrganizationIdx` ON `permissionGroups` (`organizationId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `permissions_name_unique` ON `permissions` (`name`);--> statement-breakpoint

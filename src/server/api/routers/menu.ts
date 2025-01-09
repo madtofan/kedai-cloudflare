@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { createTRPCRouter, organizationProcedure } from "../trpc";
-import { menuDetails, menus, menuToMenuDetails } from "../../db/schema";
+import {
+  menuDetails,
+  menus,
+  menuToMenuDetails,
+  storeMenus,
+} from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -52,6 +57,7 @@ const menuRouter = createTRPCRouter({
           .optional(),
         sale: z.number(),
         cost: z.number(),
+        stores: z.array(z.string()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -116,6 +122,13 @@ const menuRouter = createTRPCRouter({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create menu.",
         });
+      }
+      if (input.stores && input.stores.length > 0) {
+        const values = input.stores.map((store) => ({
+          storeId: store,
+          menuId: createdMenu.id,
+        }));
+        await ctx.db.insert(storeMenus).values(values);
       }
       await ctx.db.insert(menuToMenuDetails).values({
         menuId: createdMenu.id,

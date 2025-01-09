@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import imageCompression from "browser-image-compression";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ImageOff, Plus, Trash, X } from "lucide-react";
+import { ChevronDown, ImageOff, Plus, Trash, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -24,7 +24,7 @@ import {
 } from "~/components/ui/form";
 import Image from "next/image";
 import { api } from "~/trpc/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "~/lib/use-toast";
 import { type TRPCError } from "@trpc/server";
@@ -53,8 +53,14 @@ import {
 } from "~/components/ui/card";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
-import { type RouterInputs } from "~/server/api/root";
+import { type RouterOutputs, type RouterInputs } from "~/server/api/root";
 import { betterFetch } from "@better-fetch/fetch";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
 const formSchema = z.object({
   menuGroupId: z.coerce.number().positive(),
@@ -68,6 +74,7 @@ const formSchema = z.object({
     .optional(),
   sale: z.coerce.number(),
   cost: z.coerce.number(),
+  stores: z.array(z.string()),
 });
 
 interface Menu {
@@ -88,19 +95,28 @@ export default function DashboardMenuPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const { data: selectOptions, error: menuGroupError } =
-    api.menuGroup.getAllMenuGroup.useQuery();
-  const {
-    data: organizationMenus,
-    isFetching: loadingMenus,
-    error: menuError,
-    refetch: refetchMenus,
-  } = api.menu.getMenu.useQuery();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [resetImage, setResetImage] = useState(true);
   const [imageFile, setImageFile] = useState<File>();
   const [loadingImage, setLoadingImage] = useState(false);
   const [loadingAddMenu, setLoadingAddMenu] = useState(false);
+  const utils = api.useUtils();
+
+  const { data: stores, isLoading: isLoadingStores } =
+    api.store.getAllStore.useQuery();
+
+  const { data: selectOptions, error: menuGroupError } =
+    api.menuGroup.getAllMenuGroup.useQuery();
+
+  const {
+    data: organizationMenus,
+    isFetching: loadingMenus,
+    error: menuError,
+  } = api.menu.getMenu.useQuery();
+
+  const { mutateAsync: addMenu } = api.menu.addMenu.useMutation();
+
+  const { mutateAsync: deleteMenu } = api.menu.deleteMenu.useMutation();
 
   useEffect(() => {
     if (
@@ -110,10 +126,6 @@ export default function DashboardMenuPage() {
       router.push("/dashboard/organization");
     }
   }, [menuError?.data?.code, menuGroupError?.data?.code, router]);
-
-  const { mutateAsync: addMenu } = api.menu.addMenu.useMutation();
-
-  const { mutateAsync: deleteMenu } = api.menu.deleteMenu.useMutation();
 
   const menuItems: Menu[] = useMemo(() => {
     if (!organizationMenus) {
@@ -142,6 +154,7 @@ export default function DashboardMenuPage() {
       image: undefined,
       sale: 0.0,
       cost: 0.0,
+      stores: [],
     },
   });
 
@@ -153,6 +166,7 @@ export default function DashboardMenuPage() {
       description: values.description ?? "",
       sale: values.sale,
       cost: values.cost,
+      stores: values.stores,
     };
     if (values.image) {
       menuDetails = {
@@ -184,7 +198,10 @@ export default function DashboardMenuPage() {
         form.reset();
         setImagePreview(null);
         setSheetOpen(false);
-        await refetchMenus();
+        await Promise.allSettled([
+          utils.store.getAllStoreWithMenu.invalidate(),
+          utils.menu.getMenu.invalidate(),
+        ]);
       })
       .catch((error: TRPCError) => {
         toast({
@@ -194,6 +211,10 @@ export default function DashboardMenuPage() {
         });
       })
       .finally(() => setLoadingAddMenu(false));
+  };
+
+  const updateStores = (newStoreArray: string[]) => {
+    form.setValue("stores", newStoreArray);
   };
 
   const onDeleteItem = (
@@ -209,7 +230,7 @@ export default function DashboardMenuPage() {
           title: "Removed menu",
           description: "You have successfully removed the menu.",
         });
-        await refetchMenus();
+        await utils.menu.getMenu.invalidate();
       })
       .catch((error: TRPCError) => {
         toast({
@@ -448,6 +469,12 @@ export default function DashboardMenuPage() {
                   </FormItem>
                 )}
               />
+              <StoreSelector
+                stores={stores}
+                initialSelectedStore={form.getValues("stores")}
+                updateStores={updateStores}
+                isLoadingStores={isLoadingStores}
+              />
               <div className="flex items-end"></div>
               <SheetFooter>
                 <Button type="submit" disabled={loadingAddMenu}>
@@ -569,5 +596,101 @@ function MenuItem({
         <div>{renderImage()}</div>
       </CardContent>
     </Card>
+  );
+}
+
+function StoreSelector({
+  stores,
+  initialSelectedStore,
+  updateStores,
+  isLoadingStores,
+}: {
+  stores?: RouterOutputs["store"]["getAllStore"];
+  initialSelectedStore: string[];
+  updateStores: (newStores: string[]) => void;
+  isLoadingStores: boolean;
+}) {
+  const [selectedStores, setSelectedStores] =
+    useState<string[]>(initialSelectedStore);
+
+  useEffect(() => {
+    const allStoresId = stores?.map((store) => store.id) ?? [];
+    setSelectedStores(allStoresId);
+    updateStores(allStoresId);
+  }, [stores, updateStores]);
+
+  const generateStoreText = useCallback(() => {
+    if (!selectedStores || selectedStores.length === 0) {
+      return `Menu is not added to any stores`;
+    }
+
+    if (selectedStores.length === stores?.length) {
+      return `Add menu to all stores`;
+    }
+
+    if (selectedStores.length === 1) {
+      return `Menu is added to ${stores?.find((store) => store.id === selectedStores[0])?.name}`;
+    }
+
+    return `Menu is added to ${selectedStores.length}`;
+  }, [selectedStores, stores]);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          disabled={!stores || isLoadingStores}
+          className="justify-between"
+        >
+          {!stores && isLoadingStores ? (
+            <>
+              <span>Loading Stores</span>
+              <Spinner />
+            </>
+          ) : (
+            <>
+              <span>{generateStoreText()}</span>
+              <ChevronDown />
+            </>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-max">
+        <DropdownMenuCheckboxItem
+          key="all-stores"
+          className="capitalize"
+          checked={stores?.length === selectedStores.length}
+          onCheckedChange={(value) => {
+            const newSelectedStores = value
+              ? (stores?.map((store) => store.id) ?? [])
+              : [];
+            updateStores(newSelectedStores);
+            setSelectedStores(newSelectedStores);
+          }}
+        >
+          All Stores
+        </DropdownMenuCheckboxItem>
+        {stores?.map((store) => {
+          const checked = selectedStores.includes(store.id);
+          return (
+            <DropdownMenuCheckboxItem
+              key={`${store.slug}_${checked}`}
+              className="capitalize"
+              checked={checked}
+              onCheckedChange={(value) => {
+                const newSelectedStores = value
+                  ? [...selectedStores, store.id]
+                  : selectedStores.filter((selected) => selected !== store.id);
+                setSelectedStores(newSelectedStores);
+                updateStores(newSelectedStores);
+              }}
+            >
+              {store.name}
+            </DropdownMenuCheckboxItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

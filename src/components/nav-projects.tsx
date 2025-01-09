@@ -23,7 +23,7 @@ export function NavStores({
   stores,
 }: {
   stores: {
-    id: number;
+    id: string;
     name: string;
     url: string;
     isOpen: boolean | null;
@@ -36,7 +36,7 @@ export function NavStores({
       <SidebarGroupLabel>Stores</SidebarGroupLabel>
       <SidebarMenu>
         {stores.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
                 {item.isOpen ? <Circle /> : <CircleOff />}

@@ -59,7 +59,7 @@ const storeRouter = createTRPCRouter({
   editStore: organizationProcedure
     .input(
       z.object({
-        id: z.number().int(),
+        id: z.string(),
         name: z.string().trim().min(1).max(256),
         slug: z.string().trim().min(1).max(256),
       }),
@@ -88,7 +88,7 @@ const storeRouter = createTRPCRouter({
     }),
 
   deleteStore: organizationProcedure
-    .input(z.object({ id: z.number().int() }))
+    .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const deletedStore = await ctx.db
         .delete(stores)
@@ -111,7 +111,7 @@ const storeRouter = createTRPCRouter({
   openCloseStore: organizationProcedure
     .input(
       z.object({
-        storeId: z.number().int(),
+        storeId: z.string(),
         isOpen: z.boolean(),
       }),
     )

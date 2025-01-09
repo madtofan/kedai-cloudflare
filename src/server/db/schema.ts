@@ -8,6 +8,9 @@ import {
   unique,
   real,
 } from "drizzle-orm/sqlite-core";
+import { nanoid } from "nanoid";
+
+const generatePublicId = () => nanoid();
 
 // Auth tables
 export const user = sqliteTable("user", {
@@ -288,7 +291,7 @@ export const rolesToPermissionsRelations = relations(
 export const stores = createTable(
   "stores",
   {
-    id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+    id: text("id").$default(generatePublicId).primaryKey(),
     name: text("name").notNull(),
     isOpen: integer("isOpen", { mode: "boolean" }).default(false),
     slug: text("slug").notNull(),
@@ -475,8 +478,8 @@ export const orders = createTable(
   "orders",
   {
     id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    storeSlug: text("storeSlug")
-      .references(() => stores.slug, { onDelete: "cascade" })
+    storeId: text("storeId")
+      .references(() => stores.id, { onDelete: "cascade" })
       .notNull(),
     tableName: text("tableName").notNull(),
     completedAt: integer("completedAt", { mode: "timestamp" }),
@@ -490,12 +493,12 @@ export const orders = createTable(
     ),
   },
   (example) => ({
-    storeIndex: index("orderStoreIdx").on(example.storeSlug),
+    storeIndex: index("orderStoreIdx").on(example.storeId),
   }),
 );
 export const ordersRelations = relations(orders, ({ one, many }) => ({
   stores: one(stores, {
-    fields: [orders.storeSlug],
+    fields: [orders.storeId],
     references: [stores.id],
   }),
   orderItems: many(orderItems),

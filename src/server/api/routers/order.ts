@@ -12,6 +12,7 @@ const orderRouter = createTRPCRouter({
   addOrder: publicProcedure
     .input(
       z.object({
+        organizationSlug: z.string().trim().min(1).max(256),
         storeSlug: z.string().trim().min(1).max(256),
         tableName: z.string().trim().min(1).max(256),
         orders: z.array(
@@ -23,10 +24,30 @@ const orderRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const organization = await ctx.db.query.organization.findFirst({
+        where: (organization, { eq }) =>
+          eq(organization.slug, input.organizationSlug),
+        columns: {
+          id: true,
+        },
+        with: {
+          stores: {
+            where: (store, { eq }) => eq(store.slug, input.storeSlug),
+            columns: { id: true },
+          },
+        },
+      });
+      const storeId = organization?.stores.find(Boolean)?.id;
+      if (!storeId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Store not found.",
+        });
+      }
       let order = await ctx.db.query.orders.findFirst({
         where: (order, { eq, and, isNull }) =>
           and(
-            eq(order.storeSlug, input.storeSlug),
+            eq(order.storeId, storeId),
             eq(order.tableName, input.tableName),
             isNull(order.completedAt),
           ),
@@ -42,7 +63,7 @@ const orderRouter = createTRPCRouter({
           await ctx.db
             .insert(orders)
             .values({
-              storeSlug: input.storeSlug,
+              storeId,
               tableName: input.tableName,
             })
             .returning()
@@ -70,8 +91,6 @@ const orderRouter = createTRPCRouter({
           message: "Failed to create some item orders.",
         });
       }
-      return { order: order, items: items };
-
       return { order, items };
     }),
 
