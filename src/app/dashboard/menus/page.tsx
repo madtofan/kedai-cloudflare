@@ -225,16 +225,18 @@ export default function DashboardMenuPage() {
     deleteMenu({
       id: menuId,
     })
-      .then(async () => {
-        toast({
-          title: "Removed menu",
-          description: "You have successfully removed the menu.",
-        });
-        Promise.allSettled([
+      .then(() => {
+        return Promise.allSettled([
           utils.menu.getMenu.invalidate(),
           utils.store.getStoreMenus.invalidate(),
           utils.store.getAllStoreWithMenu.invalidate(),
         ]);
+      })
+      .then(() => {
+        toast({
+          title: "Removed menu",
+          description: "You have successfully removed the menu.",
+        });
       })
       .catch((error: TRPCError) => {
         toast({

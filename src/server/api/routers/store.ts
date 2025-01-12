@@ -201,6 +201,20 @@ const storeRouter = createTRPCRouter({
           message: "Unable to find organization.",
         });
       }
+      const store = await ctx.db.query.stores.findFirst({
+        columns: { isOpen: true },
+        where: (store, { eq, and }) =>
+          and(
+            eq(store.slug, input.storeSlug),
+            eq(store.organizationId, organization.id),
+          ),
+      });
+      if (!store?.isOpen) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Store does not exist or is currently closed",
+        });
+      }
       const storeMenus = await ctx.db.query.stores.findFirst({
         columns: { name: true },
         where: (store, { and, eq }) =>

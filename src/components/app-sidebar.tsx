@@ -93,6 +93,8 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: userDetails } = api.user.getCurrentUser.useQuery();
+  const { data: organizationDetails } =
+    api.organization.getOrganization.useQuery();
   const {
     data: stores,
     error,
@@ -114,9 +116,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         id: store.id,
         name: store.name,
         url: `/dashboard/store/${store.slug}`,
+        orderUrl: `/menu/${organizationDetails?.slug}/${store.slug}`,
         isOpen: store.isOpen,
       })) ?? [],
-    [stores],
+    [stores, organizationDetails],
   );
   return (
     <Sidebar variant="inset" {...props}>
