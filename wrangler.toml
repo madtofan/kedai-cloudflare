@@ -8,9 +8,9 @@ pages_build_output_dir = ".vercel/output/static"
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#kv-namespaces
-# [[kv_namespaces]]
-# binding = "NEXT_CACHE_WORKERS_KV"
-# id = "2dc8ddb5fb8d489aa071e449b1149ad2"
+[[kv_namespaces]]
+binding = "__NEXT_ON_PAGES__KV_SUSPENSE_CACHE"
+id = "b1c8ac7bf4984841bb86edc1bef8fc34"
 
 # Bind a D1 database. D1 is Cloudflare’s native serverless SQL database.
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#d1-databases
