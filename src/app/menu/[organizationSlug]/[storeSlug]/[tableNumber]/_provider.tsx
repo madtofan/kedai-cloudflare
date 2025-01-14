@@ -27,6 +27,7 @@ interface MenuContext {
   totalPrice: number;
   content: ContentType;
   updateContent: (newContent: ContentType) => void;
+  tableNumber: string;
 }
 
 const Context = createContext<MenuContext>({
@@ -43,6 +44,7 @@ const Context = createContext<MenuContext>({
   updateContent: () => {
     console.log("Uninitialized context");
   },
+  tableNumber: "",
 });
 
 export const useMenuContext = () => {
@@ -55,14 +57,17 @@ export const useMenuContext = () => {
 
 export function MenuProvider({
   menu,
+  table,
   children,
 }: {
   menu: RouterOutputs["store"]["getStoreMenus"];
+  table: string;
   children: ReactNode;
 }) {
   const [storeData, _setStoreData] = useState(menu);
   const [cart, setCart] = useState<Record<number, number>>({});
   const [totalPrice, setTotalPrice] = useState(0);
+  const [tableNumber] = useState(table);
   const [content, setContent] = useState<ContentType>("browse");
 
   const storeItemMap: Record<number, MenuDetails> = useMemo(
@@ -110,9 +115,10 @@ export function MenuProvider({
       updateCart,
       totalPrice,
       content,
+      tableNumber,
       updateContent: setContent,
     }),
-    [storeData, cart, updateCart, totalPrice, content],
+    [storeData, cart, updateCart, totalPrice, content, tableNumber],
   );
 
   return <Context.Provider value={values}>{children}</Context.Provider>;

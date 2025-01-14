@@ -2,7 +2,11 @@ import { api } from "~/trpc/server";
 import { type ReactNode } from "react";
 import { MenuProvider } from "./_provider";
 
-type ParamType = Promise<{ organizationSlug: string; storeSlug: string }>;
+type ParamType = Promise<{
+  organizationSlug: string;
+  storeSlug: string;
+  tableNumber: string;
+}>;
 
 export async function generateMetadata({ params }: { params: ParamType }) {
   const { organizationSlug, storeSlug } = await params;
@@ -27,12 +31,16 @@ export default async function MenuLayout({
   params: ParamType;
   children: ReactNode;
 }) {
-  const { organizationSlug, storeSlug } = await params;
+  const { organizationSlug, storeSlug, tableNumber } = await params;
   const menu = await api.store
     .getStoreMenus({ organizationSlug, storeSlug })
     .catch(() => {
       return { name: "", storeMenus: [] };
     });
 
-  return <MenuProvider menu={menu}>{children}</MenuProvider>;
+  return (
+    <MenuProvider menu={menu} table={tableNumber}>
+      {children}
+    </MenuProvider>
+  );
 }
