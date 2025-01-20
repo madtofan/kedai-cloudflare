@@ -72,7 +72,7 @@ const data = {
         },
         {
           title: "Menu Groups",
-          url: "/dashboard/menus",
+          url: "/dashboard/menus/menu-groups",
         },
       ],
     },

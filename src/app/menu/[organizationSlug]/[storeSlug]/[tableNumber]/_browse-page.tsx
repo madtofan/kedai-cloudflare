@@ -28,7 +28,7 @@ export function BrowsePage() {
   const storeMenu = useMemo(() => {
     return storeData.storeMenus.reduce<Record<string, MenuDetails[]>>(
       (acc, val) => {
-        const groupName = val.menu.menuGroups.name;
+        const groupName = val.menu.menuGroups?.name ?? "No menu group assigned";
         const prevVal = acc[groupName] ?? [];
         return { ...acc, [groupName]: [...prevVal, val.menu.menuDetails] };
       },

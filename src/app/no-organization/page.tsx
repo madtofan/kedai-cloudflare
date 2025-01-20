@@ -64,7 +64,7 @@ export default function NoOrganization() {
           title: "Organization Created",
           description: `Your organization "${values.organizationName}" has been created successfully.`,
         });
-        router.push("/dashboard");
+        router.push("/no-organization/new-menu-group");
       })
       .catch((error: TRPCError) => {
         console.error(error);

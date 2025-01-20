@@ -16,31 +16,23 @@ import { env } from "~/env";
 
 const menuRouter = createTRPCRouter({
   getMenu: organizationProcedure.query(async ({ ctx }) => {
-    const menuGroups = await ctx.db.query.menuGroups.findMany({
-      columns: {
-        id: true,
-        name: true,
-      },
-      where: (menuGroup, { eq }) =>
-        eq(menuGroup.organizationId, ctx.organizationId),
+    const menus = await ctx.db.query.menus.findMany({
+      where: (menu, { eq }) => eq(menu.organizationId, ctx.organizationId),
       with: {
-        menus: {
+        menuGroups: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+        menuDetails: {
           columns: {
             updatedAt: false,
-            menuDetailsId: false,
-            menuGroupId: false,
-          },
-          with: {
-            menuDetails: {
-              columns: {
-                updatedAt: false,
-              },
-            },
           },
         },
       },
     });
-    return menuGroups;
+    return menus;
   }),
 
   addMenu: organizationProcedure
@@ -113,6 +105,7 @@ const menuRouter = createTRPCRouter({
           .insert(menus)
           .values({
             menuGroupId: input.menuGroupId,
+            organizationId: ctx.organizationId,
             menuDetailsId: createdMenuDetail.id,
           })
           .returning()
@@ -152,22 +145,11 @@ const menuRouter = createTRPCRouter({
       const menuOrganizationId = (
         await ctx.db.query.menus.findFirst({
           columns: {
-            id: false,
-            menuGroupId: false,
-            menuDetailsId: false,
-            createdAt: false,
-            updatedAt: false,
+            organizationId: true,
           },
           where: (menu, { eq }) => eq(menu.id, input.id),
-          with: {
-            menuGroups: {
-              columns: {
-                organizationId: true,
-              },
-            },
-          },
         })
-      )?.menuGroups.organizationId;
+      )?.organizationId;
       if (menuOrganizationId !== ctx.organizationId) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -215,22 +197,11 @@ const menuRouter = createTRPCRouter({
       const menuOrganizationId = (
         await ctx.db.query.menus.findFirst({
           columns: {
-            id: false,
-            menuGroupId: false,
-            menuDetailsId: false,
-            createdAt: false,
-            updatedAt: false,
+            organizationId: true,
           },
           where: (menu, { eq }) => eq(menu.id, input.id),
-          with: {
-            menuGroups: {
-              columns: {
-                organizationId: true,
-              },
-            },
-          },
         })
-      )?.menuGroups.organizationId;
+      )?.organizationId;
       if (menuOrganizationId !== ctx.organizationId) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

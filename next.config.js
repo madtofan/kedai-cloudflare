@@ -61,7 +61,7 @@ const config = {
         permanent: false,
       },
       {
-        source: "/no-organization",
+        source: "/no-organization/:pages*",
         missing: [
           {
             type: "cookie",

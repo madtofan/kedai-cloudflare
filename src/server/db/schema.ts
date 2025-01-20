@@ -408,11 +408,12 @@ export const menus = createTable(
   "menus",
   {
     id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    menuGroupId: integer("menuGroupId")
-      .references(() => menuGroups.id, {
-        onDelete: "set null",
-      })
-      .notNull(),
+    menuGroupId: integer("menuGroupId").references(() => menuGroups.id, {
+      onDelete: "set null",
+    }),
+    organizationId: text("organizationId")
+      .notNull()
+      .references(() => organization.id),
     menuDetailsId: integer("menuDetailsId")
       .references(() => menuDetails.id, {
         onDelete: "set null",
@@ -426,6 +427,7 @@ export const menus = createTable(
     ),
   },
   (example) => ({
+    organizationIndex: index("menuOrganizationIdx").on(example.organizationId),
     menuGroupIndex: index("menuGroupIdx").on(example.menuGroupId),
   }),
 );
@@ -433,6 +435,10 @@ export const menusRelations = relations(menus, ({ one, many }) => ({
   menuGroups: one(menuGroups, {
     fields: [menus.menuGroupId],
     references: [menuGroups.id],
+  }),
+  organization: one(organization, {
+    fields: [menus.organizationId],
+    references: [organization.id],
   }),
   menuDetails: one(menuDetails, {
     fields: [menus.menuDetailsId],

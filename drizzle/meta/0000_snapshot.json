@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "6059ce01-4aba-4874-9265-ed4c8bd00e6d",
+  "id": "ba459a19-54c7-4e70-8705-9dcf94b7c963",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -648,6 +648,13 @@
           "name": "menuGroupId",
           "type": "integer",
           "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "organizationId": {
+          "name": "organizationId",
+          "type": "text",
+          "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
@@ -675,6 +682,13 @@
         }
       },
       "indexes": {
+        "menuOrganizationIdx": {
+          "name": "menuOrganizationIdx",
+          "columns": [
+            "organizationId"
+          ],
+          "isUnique": false
+        },
         "menuGroupIdx": {
           "name": "menuGroupIdx",
           "columns": [
@@ -695,6 +709,19 @@
             "id"
           ],
           "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "menus_organizationId_organization_id_fk": {
+          "name": "menus_organizationId_organization_id_fk",
+          "tableFrom": "menus",
+          "tableTo": "organization",
+          "columnsFrom": [
+            "organizationId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "menus_menuDetailsId_menuDetails_id_fk": {

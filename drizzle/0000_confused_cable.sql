@@ -89,11 +89,13 @@ CREATE TABLE `menuToMenuDetails` (
 --> statement-breakpoint
 CREATE TABLE `menus` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`menuGroupId` integer NOT NULL,
+	`menuGroupId` integer,
+	`organizationId` text NOT NULL,
 	`menuDetailsId` integer NOT NULL,
 	`createdAt` integer DEFAULT (unixepoch()) NOT NULL,
 	`updatedAt` integer,
 	FOREIGN KEY (`menuGroupId`) REFERENCES `menuGroups`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`organizationId`) REFERENCES `organization`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`menuDetailsId`) REFERENCES `menuDetails`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
@@ -203,6 +205,7 @@ CREATE TABLE `verification` (
 --> statement-breakpoint
 CREATE INDEX `menuNameIndex` ON `menuDetails` (`name`);--> statement-breakpoint
 CREATE INDEX `menuGroupOrganizationIdx` ON `menuGroups` (`organizationId`);--> statement-breakpoint
+CREATE INDEX `menuOrganizationIdx` ON `menus` (`organizationId`);--> statement-breakpoint
 CREATE INDEX `menuGroupIdx` ON `menus` (`menuGroupId`);--> statement-breakpoint
 CREATE INDEX `itemOrderIdx` ON `orderItems` (`orderId`);--> statement-breakpoint
 CREATE INDEX `orderStoreIdx` ON `orders` (`storeId`);--> statement-breakpoint

@@ -86,6 +86,13 @@ const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (ctx.session.activeOrganizationId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "User must not be in an existing organization to accept another one.",
+        });
+      }
       const acceptedInvitation = await auth(
         getRequestContext().env as Env,
       ).api.acceptInvitation({

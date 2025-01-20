@@ -25,6 +25,8 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useToast } from "~/hooks/use-toast";
 import { MenuForm } from "~/components/add-menu-form";
+import { VerticalContainer } from "~/components/ui/container";
+import Link from "next/link";
 
 interface Menu {
   createdAt: Date;
@@ -40,7 +42,7 @@ interface Menu {
   description: string | null;
 }
 
-export default function DashboardMenuPage() {
+export default function NewMenuPage() {
   const { toast } = useToast();
   const [sheetOpen, setSheetOpen] = useState(false);
   const utils = api.useUtils();
@@ -137,11 +139,21 @@ export default function DashboardMenuPage() {
         }}
       >
         <div className="mb-6 flex flex-row justify-between rounded-lg bg-sidebar p-4 shadow">
-          <h2 className="text-lg font-semibold">Menu</h2>
-          <div>
+          <div className="grid grid-flow-col gap-4">
+            <h2 className="self-center text-lg font-semibold">
+              Initialization Wizard
+            </h2>
+            <p className="self-center">Lets add menu to your store!</p>
+          </div>
+          <div className="grid grid-flow-col gap-4">
             <SheetTrigger asChild>
-              <Button>Add New Menu</Button>
+              <Button variant="default">Add New Menu</Button>
             </SheetTrigger>
+            <Button asChild variant="outline">
+              <Link href="/dashboard">
+                {menuItems.length === 0 ? "Skip" : "Done"}
+              </Link>
+            </Button>
           </div>
         </div>
         <SheetContent className="bg-sidebar">
@@ -155,9 +167,11 @@ export default function DashboardMenuPage() {
         </SheetContent>
       </Sheet>
 
-      <ScrollArea className="h-[calc(100vh-200px)] justify-center">
-        {renderMenus()}
-      </ScrollArea>
+      <VerticalContainer>
+        <ScrollArea className="h-[calc(100vh-200px)] justify-center">
+          {renderMenus()}
+        </ScrollArea>
+      </VerticalContainer>
     </main>
   );
 }
