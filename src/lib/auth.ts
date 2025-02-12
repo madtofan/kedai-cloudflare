@@ -1,10 +1,10 @@
 import { betterAuth } from "better-auth";
 import { oneTap, organization } from "better-auth/plugins";
 import { env } from "~/env";
-import { sendOrganizationInvitation } from "./email/organization-invitation";
+import { reactInvitationEmail } from "./email/organization-invitation";
 import { D1Dialect } from "kysely-d1";
-import { resetPassword } from "./email/reset-password";
 import { Kysely } from "kysely";
+import { sendEmail } from "./send-email";
 
 export const auth = (cloudflareEnv: Env) => {
   return betterAuth({
@@ -27,6 +27,18 @@ export const auth = (cloudflareEnv: Env) => {
       }),
       type: "sqlite",
     },
+    emailVerification: {
+      async sendVerificationEmail({ user, url }) {
+        sendEmail({
+          to: user.email,
+          subject: "Verify your email address",
+          html: `<a href="${url}">Verify your email address</a>`,
+        });
+      },
+      sendOnSignUp: true,
+      autoSignInAfterVerification: true,
+      expiresIn: 3600,
+    },
     account: {
       accountLinking: {
         trustedProviders: ["google"],
@@ -34,12 +46,16 @@ export const auth = (cloudflareEnv: Env) => {
     },
     emailAndPassword: {
       enabled: true,
+      requireEmailVerification: true,
+      autoSignIn: false,
       async sendResetPassword({ user, url }) {
-        resetPassword({
-          email: user.email,
-          resetLink: url,
+        sendEmail({
+          to: user.email,
+          subject: "RESET PASSWORD",
+          html: `<a href="${url}">Reset your password</a>`,
         });
       },
+      resetPasswordTokenExpiresIn: 3600,
     },
     socialProviders: {
       google: {
@@ -52,16 +68,35 @@ export const auth = (cloudflareEnv: Env) => {
       organization({
         async sendInvitationEmail(data) {
           const inviteLink = `${env.NEXT_PUBLIC_BETTER_AUTH_URL}/accept-invitation/${data.id}`;
-          sendOrganizationInvitation({
-            email: data.email,
-            invitedByUsername: data.inviter.user.name,
-            invitedByEmail: data.inviter.user.email,
-            teamName: data.organization.name,
-            inviteLink,
+
+          sendEmail({
+            to: data.email,
+            subject: `You are invited to join ${data.organization.name}'s Kedai POS System`,
+            html: await reactInvitationEmail({
+              username: data.email,
+              invitedByUsername: data.inviter.user.name,
+              invitedByEmail: data.inviter.user.email,
+              teamName: data.organization.name,
+              teamImage: data.organization.logo ?? undefined,
+              inviteLink,
+            }),
           });
         },
       }),
     ],
+    databaseHooks: {
+      user: {
+        create: {
+          async after(user) {
+            sendEmail({
+              to: user.email,
+              subject: "Welcome to Kedai POS System",
+              html: `<p>Welcome to the kedai POS System ${user.name}</p>`,
+            });
+          },
+        },
+      },
+    },
   });
 };
 

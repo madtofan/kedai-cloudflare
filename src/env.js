@@ -15,6 +15,8 @@ export const env = createEnv({
     CLOUDFLARE_R2_BUCKET_NAME: z.string(),
     CLOUDFLARE_R2_ID: z.string(),
     CLOUDFLARE_R2_TOKEN: z.string(),
+    EMAIL_API_ENDPOINT: z.string(),
+    EMAIL_API_KEY: z.string(),
     GOOGLE_AUTH_SECRET: z.string(),
     NODE_ENV: z
       .enum(["development", "preview", "production"])
@@ -47,6 +49,8 @@ export const env = createEnv({
     CLOUDFLARE_R2_ID: process.env.CLOUDFLARE_R2_ID,
     CLOUDFLARE_R2_TOKEN: process.env.CLOUDFLARE_R2_TOKEN,
     GOOGLE_AUTH_SECRET: process.env.GOOGLE_AUTH_SECRET,
+    EMAIL_API_ENDPOINT: process.env.EMAIL_API_ENDPOINT,
+    EMAIL_API_KEY: process.env.EMAIL_API_KEY,
     NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV,
     NEXT_PUBLIC_BETTER_AUTH_URL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
     NEXT_PUBLIC_GOOGLE_AUTH_ID: process.env.NEXT_PUBLIC_GOOGLE_AUTH_ID,
