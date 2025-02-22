@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { ArrowLeft, Minus, Plus } from "lucide-react";
+import { ArrowLeft, Minus, Plus, ShoppingCart } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,6 +12,7 @@ import {
 } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
+import { Spinner } from "~/components/ui/spinner";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { useMenuContext } from "./_provider";
@@ -26,6 +27,7 @@ export function CheckoutPage() {
     totalPrice,
     updateContent,
     submitOrder,
+    submittingOrder,
   } = useMenuContext();
 
   const tax = totalPrice * 0.1; // 10% tax
@@ -33,9 +35,7 @@ export function CheckoutPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle order submission here
     if (submitOrder) {
-      console.log("Order submitted:", { cart, storeData, totalPrice });
       submitOrder()
         .then(() => {
           updateContent("success");
@@ -48,11 +48,7 @@ export function CheckoutPage() {
     <form onSubmit={handleSubmit}>
       <StickyTop>
         <VerticalContainer className="p-0">
-          <Button
-            className="w-full"
-            disabled={Object.keys(cart).length === 0}
-            onClick={() => updateContent("browse")}
-          >
+          <Button className="w-full" onClick={() => updateContent("browse")}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to browse
           </Button>
         </VerticalContainer>
@@ -82,6 +78,7 @@ export function CheckoutPage() {
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
+                      type="button"
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => updateCart(itemMenu.id, count - 1)}
@@ -91,6 +88,7 @@ export function CheckoutPage() {
                     <span className="w-8 text-center">{count}</span>
                     <Button
                       variant="outline"
+                      type="button"
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => updateCart(itemMenu.id, count + 1)}
@@ -116,7 +114,7 @@ export function CheckoutPage() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${totalPrice}</span>
+                <span>${totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Tax (10%)</span>
@@ -147,7 +145,16 @@ export function CheckoutPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={submittingOrder || Object.keys(cart).length === 0}
+            >
+              {submittingOrder ? (
+                <Spinner />
+              ) : (
+                <ShoppingCart className="mr-2 h-4 w-4" />
+              )}
               Place Order
             </Button>
           </CardFooter>

@@ -29,7 +29,8 @@ interface MenuContext {
   content: ContentType;
   updateContent: (newContent: ContentType) => void;
   tableName: string;
-  submitOrder?: () => Promise<RouterOutputs["order"]["addOrder"]>;
+  submitOrder: () => Promise<RouterOutputs["order"]["addOrder"]>;
+  submittingOrder: boolean;
 }
 
 const Context = createContext<MenuContext>({
@@ -54,6 +55,7 @@ const Context = createContext<MenuContext>({
       }),
     );
   },
+  submittingOrder: false,
 });
 
 export const useMenuContext = () => {
@@ -85,7 +87,13 @@ export function MenuProvider({
   const [storeSlug] = useState(store);
   const [content, setContent] = useState<ContentType>("browse");
 
-  const { mutateAsync: orderItems } = api.order.addOrder.useMutation();
+  const { mutateAsync: orderItems, isPending: submittingOrder } =
+    api.order.addOrder.useMutation({
+      onSuccess: () => {
+        setCart({});
+        setTotalPrice(0);
+      },
+    });
 
   const storeItemMap: Record<number, MenuDetails> = useMemo(
     () =>
@@ -147,8 +155,18 @@ export function MenuProvider({
       tableName,
       updateContent: setContent,
       submitOrder,
+      submittingOrder,
     }),
-    [storeData, cart, updateCart, totalPrice, content, tableName, submitOrder],
+    [
+      storeData,
+      cart,
+      updateCart,
+      totalPrice,
+      content,
+      tableName,
+      submitOrder,
+      submittingOrder,
+    ],
   );
 
   return <Context.Provider value={values}>{children}</Context.Provider>;
