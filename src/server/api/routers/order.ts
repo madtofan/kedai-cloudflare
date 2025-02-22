@@ -91,7 +91,7 @@ const orderRouter = createTRPCRouter({
           message: "Failed to create some item orders.",
         });
       }
-      return { order, items };
+      return { success: true };
     }),
 
   updateOrder: organizationProcedure

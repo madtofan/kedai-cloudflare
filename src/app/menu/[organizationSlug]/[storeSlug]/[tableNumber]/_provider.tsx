@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { type RouterOutputs } from "~/server/api/root";
+import { api } from "~/trpc/react";
 
 export interface MenuDetails {
   id: number;
@@ -18,7 +19,7 @@ export interface MenuDetails {
   sale: number;
 }
 
-type ContentType = "browse" | "checkout";
+type ContentType = "browse" | "checkout" | "success";
 
 interface MenuContext {
   storeData: RouterOutputs["store"]["getStoreMenus"];
@@ -27,7 +28,8 @@ interface MenuContext {
   totalPrice: number;
   content: ContentType;
   updateContent: (newContent: ContentType) => void;
-  tableNumber: string;
+  tableName: string;
+  submitOrder?: () => Promise<RouterOutputs["order"]["addOrder"]>;
 }
 
 const Context = createContext<MenuContext>({
@@ -44,7 +46,14 @@ const Context = createContext<MenuContext>({
   updateContent: () => {
     console.log("Uninitialized context");
   },
-  tableNumber: "",
+  tableName: "",
+  submitOrder: () => {
+    return new Promise((resolve) =>
+      resolve({
+        success: false,
+      }),
+    );
+  },
 });
 
 export const useMenuContext = () => {
@@ -58,17 +67,25 @@ export const useMenuContext = () => {
 export function MenuProvider({
   menu,
   table,
+  organization,
+  store,
   children,
 }: {
   menu: RouterOutputs["store"]["getStoreMenus"];
   table: string;
+  organization: string;
+  store: string;
   children: ReactNode;
 }) {
   const [storeData, _setStoreData] = useState(menu);
   const [cart, setCart] = useState<Record<number, number>>({});
   const [totalPrice, setTotalPrice] = useState(0);
-  const [tableNumber] = useState(table);
+  const [tableName] = useState(table);
+  const [organizationSlug] = useState(organization);
+  const [storeSlug] = useState(store);
   const [content, setContent] = useState<ContentType>("browse");
+
+  const { mutateAsync: orderItems } = api.order.addOrder.useMutation();
 
   const storeItemMap: Record<number, MenuDetails> = useMemo(
     () =>
@@ -108,6 +125,18 @@ export function MenuProvider({
     [storeItemMap],
   );
 
+  const submitOrder = useCallback(() => {
+    return orderItems({
+      organizationSlug,
+      storeSlug,
+      tableName,
+      orders: Object.entries(cart).map(([menuDetailsId, quantity]) => ({
+        menuDetailsId: Number(menuDetailsId),
+        quantity,
+      })),
+    });
+  }, [cart, orderItems, organizationSlug, storeSlug, tableName]);
+
   const values = useMemo(
     () => ({
       storeData,
@@ -115,10 +144,11 @@ export function MenuProvider({
       updateCart,
       totalPrice,
       content,
-      tableNumber,
+      tableName,
       updateContent: setContent,
+      submitOrder,
     }),
-    [storeData, cart, updateCart, totalPrice, content, tableNumber],
+    [storeData, cart, updateCart, totalPrice, content, tableName, submitOrder],
   );
 
   return <Context.Provider value={values}>{children}</Context.Provider>;

@@ -39,7 +39,12 @@ export default async function MenuLayout({
     });
 
   return (
-    <MenuProvider menu={menu} table={tableNumber}>
+    <MenuProvider
+      menu={menu}
+      table={tableNumber}
+      organization={organizationSlug}
+      store={storeSlug}
+    >
       {children}
     </MenuProvider>
   );
