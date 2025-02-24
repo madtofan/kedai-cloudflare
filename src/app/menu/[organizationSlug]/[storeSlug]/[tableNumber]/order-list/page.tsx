@@ -1,5 +1,4 @@
 import { ArrowLeft, Clock } from "lucide-react";
-import { type ReactNode } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -62,7 +61,6 @@ export default async function OrderHistoryPage({
   params,
 }: {
   params: ParamType;
-  children: ReactNode;
 }) {
   const { organizationSlug, storeSlug, tableNumber } = await params;
 
