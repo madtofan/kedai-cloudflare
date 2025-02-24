@@ -19,7 +19,7 @@ export interface MenuDetails {
   sale: number;
 }
 
-type ContentType = "browse" | "checkout" | "success";
+type ContentType = "browse" | "checkout" | "success" | "closed" | "not found";
 
 interface MenuContext {
   storeData: RouterOutputs["store"]["getStoreMenus"];
@@ -36,6 +36,7 @@ interface MenuContext {
 const Context = createContext<MenuContext>({
   storeData: {
     name: "",
+    isOpen: true,
     storeMenus: [],
   },
   cart: {},
@@ -85,7 +86,9 @@ export function MenuProvider({
   const [tableName] = useState(table);
   const [organizationSlug] = useState(organization);
   const [storeSlug] = useState(store);
-  const [content, setContent] = useState<ContentType>("browse");
+  const [content, setContent] = useState<ContentType>(
+    menu.isOpen ? (menu.name ? "browse" : "not found") : "closed",
+  );
 
   const { mutateAsync: orderItems, isPending: submittingOrder } =
     api.order.addOrder.useMutation({

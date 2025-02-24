@@ -1,8 +1,9 @@
 import { api } from "~/trpc/server";
 import { type ReactNode } from "react";
 import { MenuProvider } from "./_provider";
+import { type TRPCError } from "@trpc/server";
 
-type ParamType = Promise<{
+export type ParamType = Promise<{
   organizationSlug: string;
   storeSlug: string;
   tableNumber: string;
@@ -13,12 +14,19 @@ export async function generateMetadata({ params }: { params: ParamType }) {
 
   const menu = await api.store
     .getStoreMenus({ organizationSlug, storeSlug })
-    .catch(() => {
-      return { name: "", storeMenus: [] };
+    .catch((err: TRPCError) => {
+      if (err.code === "FORBIDDEN") {
+        return { name: "", isOpen: false, storeMenus: [] };
+      }
+      return { name: "", isOpen: true, storeMenus: [] };
     });
 
   return {
-    title: !menu.name ? "Store not found" : menu.name,
+    title: menu.isOpen
+      ? !menu.name
+        ? "Store not found"
+        : menu.name
+      : "Store is currently closed!",
     description: "POS System for Malaysian Restaurants",
     icons: [{ rel: "icon", url: "/favicon.ico" }],
   };
@@ -34,8 +42,11 @@ export default async function MenuLayout({
   const { organizationSlug, storeSlug, tableNumber } = await params;
   const menu = await api.store
     .getStoreMenus({ organizationSlug, storeSlug })
-    .catch(() => {
-      return { name: "", storeMenus: [] };
+    .catch((err: TRPCError) => {
+      if (err.code === "FORBIDDEN") {
+        return { name: "", isOpen: false, storeMenus: [] };
+      }
+      return { name: "", isOpen: true, storeMenus: [] };
     });
 
   return (

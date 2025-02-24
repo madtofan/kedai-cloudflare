@@ -209,14 +209,20 @@ const storeRouter = createTRPCRouter({
             eq(store.organizationId, organization.id),
           ),
       });
-      if (!store?.isOpen) {
+      if (!store) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Store does not exist",
+        });
+      }
+      if (!store.isOpen) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Store does not exist or is currently closed",
+          message: "Store is currently closed",
         });
       }
       const storeMenus = await ctx.db.query.stores.findFirst({
-        columns: { name: true },
+        columns: { name: true, isOpen: true },
         where: (store, { and, eq }) =>
           and(
             eq(store.slug, input.storeSlug),

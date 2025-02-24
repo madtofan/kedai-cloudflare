@@ -19,6 +19,8 @@ import { useMenuContext } from "./_provider";
 import { StickyTop } from "~/components/ui/sticky";
 import { VerticalContainer } from "~/components/ui/container";
 
+const TAX_RATE = 0.1; // 10% tax rate
+
 export function CheckoutPage() {
   const {
     storeData,
@@ -30,7 +32,7 @@ export function CheckoutPage() {
     submittingOrder,
   } = useMenuContext();
 
-  const tax = totalPrice * 0.1; // 10% tax
+  const tax = totalPrice * TAX_RATE;
   const total = totalPrice + tax;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -117,7 +119,7 @@ export function CheckoutPage() {
                 <span>${totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Tax (10%)</span>
+                <span>{`Tax (${TAX_RATE * 100}%)`}</span>
                 <span>${tax.toFixed(2)}</span>
               </div>
               <Separator />

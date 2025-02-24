@@ -20,10 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function BrowsePage() {
   const { storeData, cart, updateCart, totalPrice, updateContent } =
     useMenuContext();
+  const pathname = usePathname();
 
   const storeMenu = useMemo(() => {
     return storeData.storeMenus.reduce<Record<string, MenuDetails[]>>(
@@ -111,28 +114,33 @@ export function BrowsePage() {
     <>
       <StickyTop>
         <VerticalContainer className="p-0">
-          <Select
-            value={currentCategory ?? undefined}
-            key={currentCategory}
-            onValueChange={(value) => {
-              const element = document.getElementById(value);
-              element?.scrollIntoView({ block: "start", inline: "nearest" });
-              setCurrentCategory(value);
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {Object.keys(storeMenu).map((menu) => (
-                  <SelectItem value={menu} key={`${menu}_select`}>
-                    {menu}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-flow-col gap-4">
+            <Button asChild>
+              <Link href={`${pathname}/order-list`}>{`Order History`}</Link>
+            </Button>
+            <Select
+              value={currentCategory ?? undefined}
+              key={currentCategory}
+              onValueChange={(value) => {
+                const element = document.getElementById(value);
+                element?.scrollIntoView({ block: "start", inline: "nearest" });
+                setCurrentCategory(value);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {Object.keys(storeMenu).map((menu) => (
+                    <SelectItem value={menu} key={`${menu}_select`}>
+                      {menu}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         </VerticalContainer>
       </StickyTop>
       <VerticalContainer>

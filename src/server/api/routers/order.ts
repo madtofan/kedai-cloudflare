@@ -215,28 +215,59 @@ const orderRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  getOrder: publicProcedure
+  getTableOrders: publicProcedure
     .input(
       z.object({
-        id: z.number().int(),
+        organizationSlug: z.string().trim().min(1).max(256),
+        storeSlug: z.string().trim().min(1).max(256),
+        tableName: z.string().trim().min(1).max(256),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const order = await ctx.db.query.orders.findFirst({
-        where: (order, { eq }) => eq(order.id, input.id),
-        with: {
-          orderItems: {
+      const orders =
+        (
+          await ctx.db.query.organization.findFirst({
+            where: (organization, { eq }) =>
+              eq(organization.slug, input.organizationSlug),
+            columns: {
+              id: true,
+            },
             with: {
-              menuDetails: {
-                columns: {
-                  cost: false,
+              stores: {
+                where: (store, { eq }) => eq(store.slug, input.storeSlug),
+                columns: { id: true },
+                with: {
+                  orders: {
+                    where: (order, { eq, and, isNull }) =>
+                      and(
+                        eq(order.tableName, input.tableName),
+                        isNull(order.completedAt),
+                      ),
+                    columns: { id: true, createdAt: true },
+                    with: {
+                      orderItems: {
+                        columns: {
+                          status: true,
+                          quantity: true,
+                        },
+                        with: {
+                          menuDetails: {
+                            columns: {
+                              name: true,
+                              sale: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
-          },
-        },
-      });
-      return order;
+          })
+        )?.stores.find(Boolean)?.orders ?? [];
+
+      return orders;
     }),
 });
 
