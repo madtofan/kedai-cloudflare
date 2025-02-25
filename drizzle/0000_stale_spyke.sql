@@ -115,11 +115,12 @@ CREATE TABLE `orders` (
 	`storeId` text NOT NULL,
 	`tableName` text NOT NULL,
 	`completedAt` integer,
-	`completedValue` real,
+	`paymentId` integer,
 	`remarks` text,
 	`createdAt` integer DEFAULT (unixepoch()) NOT NULL,
 	`updatedAt` integer,
-	FOREIGN KEY (`storeId`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`storeId`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`paymentId`) REFERENCES `payments`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `organization` (
@@ -129,6 +130,14 @@ CREATE TABLE `organization` (
 	`logo` text,
 	`createdAt` integer DEFAULT (unixepoch()) NOT NULL,
 	`metadata` text
+);
+--> statement-breakpoint
+CREATE TABLE `payments` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`storeId` text NOT NULL,
+	`value` real,
+	`remarks` text,
+	FOREIGN KEY (`storeId`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `permissionGroups` (
@@ -210,6 +219,7 @@ CREATE INDEX `menuGroupIdx` ON `menus` (`menuGroupId`);--> statement-breakpoint
 CREATE INDEX `itemOrderIdx` ON `orderItems` (`orderId`);--> statement-breakpoint
 CREATE INDEX `orderStoreIdx` ON `orders` (`storeId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `organization_slug_unique` ON `organization` (`slug`);--> statement-breakpoint
+CREATE INDEX `paymentStoreIdx` ON `payments` (`storeId`);--> statement-breakpoint
 CREATE INDEX `roleOrganizationIdx` ON `permissionGroups` (`organizationId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `permissions_name_unique` ON `permissions` (`name`);--> statement-breakpoint
 CREATE UNIQUE INDEX `session_token_unique` ON `session` (`token`);--> statement-breakpoint

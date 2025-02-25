@@ -44,31 +44,16 @@ const orderRouter = createTRPCRouter({
           message: "Store not found.",
         });
       }
-      let order = await ctx.db.query.orders.findFirst({
-        where: (order, { eq, and, isNull }) =>
-          and(
-            eq(order.storeId, storeId),
-            eq(order.tableName, input.tableName),
-            isNull(order.completedAt),
-          ),
-        columns: {
-          remarks: false,
-          completedAt: false,
-          updatedAt: false,
-          completedValue: false,
-        },
-      });
-      if (!order) {
-        order = (
-          await ctx.db
-            .insert(orders)
-            .values({
-              storeId,
-              tableName: input.tableName,
-            })
-            .returning()
-        ).find(Boolean);
-      }
+      const order = (
+        await ctx.db
+          .insert(orders)
+          .values({
+            storeId,
+            tableName: input.tableName,
+          })
+          .returning()
+      ).find(Boolean);
+      // }
       if (!order) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

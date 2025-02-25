@@ -480,6 +480,28 @@ export const menuToMenuDetailsRelations = relations(
   }),
 );
 
+export const payments = createTable(
+  "payments",
+  {
+    id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+    storeId: text("storeId")
+      .references(() => stores.id, { onDelete: "cascade" })
+      .notNull(),
+    value: real("value"),
+    remarks: text("remarks"),
+  },
+  (example) => ({
+    storeIndex: index("paymentStoreIdx").on(example.storeId),
+  }),
+);
+export const paymentsRelations = relations(payments, ({ one, many }) => ({
+  stores: one(stores, {
+    fields: [payments.storeId],
+    references: [stores.id],
+  }),
+  orderItems: many(orders),
+}));
+
 export const orders = createTable(
   "orders",
   {
@@ -489,7 +511,7 @@ export const orders = createTable(
       .notNull(),
     tableName: text("tableName").notNull(),
     completedAt: integer("completedAt", { mode: "timestamp" }),
-    completedValue: real("completedValue"),
+    paymentId: integer("paymentId").references(() => payments.id),
     remarks: text("remarks"),
     createdAt: integer("createdAt", { mode: "timestamp" })
       .default(sql`(unixepoch())`)
@@ -506,6 +528,10 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   stores: one(stores, {
     fields: [orders.storeId],
     references: [stores.id],
+  }),
+  payment: one(payments, {
+    fields: [orders.paymentId],
+    references: [payments.id],
   }),
   orderItems: many(orderItems),
 }));

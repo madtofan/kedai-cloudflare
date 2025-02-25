@@ -73,6 +73,7 @@ export default async function OrderHistoryPage({
     const { total } = calculateOrderTotals(order.orderItems);
     return sum + total;
   }, 0);
+  console.log({ tableOrders });
 
   return (
     <div>
