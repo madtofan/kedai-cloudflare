@@ -35,6 +35,8 @@ yarn-error.log*
 # do not commit any .env files to git, except for the .env.example file. https://create.t3.gg/en/usage/env-variables#using-environment-variables
 .env
 .env*.local
+.env.deployment
+.dev.vars
 
 # vercel
 .vercel
@@ -44,7 +46,6 @@ yarn-error.log*
 
 # idea files
 .idea
-.env.deployment
-.env.local-dev
-.dev.vars
 .wrangler
+wrangler.jsonc
+.open-next

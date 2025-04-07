@@ -1,0 +1,83 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "kedai",
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "kv_namespaces": [
+    {
+      "binding": "<KV_BINDING>",
+      "id": "<KV_ID>",
+    },
+  ],
+  "d1_databases": [
+    {
+      "binding": "<DB_BINDING>",
+      "database_name": "<DATABASE_NAME>",
+      "database_id": "<DATABASE_ID>",
+      "migrations_dir": "drizzle",
+    },
+  ],
+  "dev": {
+    "port": 3000,
+    "local_protocol": "http",
+  },
+  "vars": {
+    "BETTER_AUTH_SECRET": "<BETTER_AUTH_SECRET>",
+    "NEXT_PUBLIC_BETTER_AUTH_URL": "<NEXT_PUBLIC_BETTER_AUTH_URL>",
+    "NEXT_PUBLIC_GOOGLE_AUTH_ID": "<NEXT_PUBLIC_GOOGLE_AUTH_ID>",
+    "GOOGLE_AUTH_SECRET": "<GOOGLE_AUTH_SECRET>",
+    "CLOUDFLARE_ACCOUNT_ID": "<CLOUDFLARE_ACCOUNT_ID>",
+    "CLOUDFLARE_IMAGE_BASE_PATH": "<CLOUDFLARE_IMAGE_BASE_PATH>",
+    "CLOUDFLARE_D1_ID": "<CLOUDFLARE_D1_ID>",
+    "CLOUDFLARE_D1_TOKEN": "<CLOUDFLARE_D1_TOKEN>",
+    "CLOUDFLARE_R2_BUCKET_NAME": "<CLOUDFLARE_R2_BUCKET_NAME>",
+    "CLOUDFLARE_R2_ID": "<CLOUDFLARE_R2_ID>",
+    "CLOUDFLARE_R2_TOKEN": "<CLOUDFLARE_R2_TOKEN>",
+    "EMAIL_API_ENDPOINT": "<EMAIL_API_ENDPOINT>",
+    "EMAIL_API_KEY": "<EMAIL_API_KEY>",
+    "NODE_ENV": "development",
+    "NEXT_PUBLIC_APP_ENV": "development",
+  },
+  "env": {
+    "dev": {
+      "kv_namespaces": [
+        {
+          "binding": "<KV_BINDING>",
+          "id": "<KV_ID>",
+        },
+      ],
+      "d1_databases": [
+        {
+          "binding": "<DB_BINDING>",
+          "database_name": "<DATABASE_NAME>",
+          "database_id": "<DATABASE_ID>",
+          "migrations_dir": "drizzle",
+        },
+      ],
+      "vars": {
+          "BETTER_AUTH_SECRET": "<BETTER_AUTH_SECRET>",
+          "NEXT_PUBLIC_BETTER_AUTH_URL": "<NEXT_PUBLIC_BETTER_AUTH_URL>",
+          "NEXT_PUBLIC_GOOGLE_AUTH_ID": "<NEXT_PUBLIC_GOOGLE_AUTH_ID>",
+          "GOOGLE_AUTH_SECRET": "<GOOGLE_AUTH_SECRET>",
+          "CLOUDFLARE_ACCOUNT_ID": "<CLOUDFLARE_ACCOUNT_ID>",
+          "CLOUDFLARE_IMAGE_BASE_PATH": "<CLOUDFLARE_IMAGE_BASE_PATH>",
+          "CLOUDFLARE_D1_ID": "<CLOUDFLARE_D1_ID>",
+          "CLOUDFLARE_D1_TOKEN": "<CLOUDFLARE_D1_TOKEN>",
+          "CLOUDFLARE_R2_BUCKET_NAME": "<CLOUDFLARE_R2_BUCKET_NAME>",
+          "CLOUDFLARE_R2_ID": "<CLOUDFLARE_R2_ID>",
+          "CLOUDFLARE_R2_TOKEN": "<CLOUDFLARE_R2_TOKEN>",
+          "EMAIL_API_ENDPOINT": "<EMAIL_API_ENDPOINT>",
+          "EMAIL_API_KEY": "<EMAIL_API_KEY>",
+          "NODE_ENV": "development",
+          "NEXT_PUBLIC_APP_ENV": "development",
+      },
+    },
+  },
+}

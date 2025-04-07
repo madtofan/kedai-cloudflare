@@ -13,10 +13,9 @@ import Link from "next/link";
 import { SignInButton } from "~/components/sign-in-button";
 import { headers } from "next/headers";
 import { auth } from "~/lib/auth";
-import { getRequestContext } from "@cloudflare/next-on-pages";
 
 export default async function Home() {
-  const session = await auth(getRequestContext().env as Env).api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
 

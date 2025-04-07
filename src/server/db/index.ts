@@ -1,9 +1,7 @@
-import { getRequestContext } from "@cloudflare/next-on-pages";
 import { drizzle } from "drizzle-orm/d1";
 
 import * as schema from "./schema";
-
-export const runtime = "edge";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 /**
  * Cache the database connection in development. This avoids creating a new connection on every HMR
@@ -21,9 +19,9 @@ export let client: D1Database | undefined;
 
 export const db = () => {
   /**
-   * Don't call getRequestContext() at the top level
+   * Don't call getCloudflareContext() at the top level
    */
-  client = globalForDb.client ?? (getRequestContext().env as Env).DB;
+  client = globalForDb.client ?? getCloudflareContext().env.DB;
 
   return drizzle(client, { schema });
 };

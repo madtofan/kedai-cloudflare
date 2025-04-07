@@ -13,7 +13,6 @@ import {
 import { TRPCError } from "@trpc/server";
 import slug from "slug";
 import { auth } from "~/lib/auth";
-import { getRequestContext } from "@cloudflare/next-on-pages";
 
 const organizationRouter = createTRPCRouter({
   createOrganization: protectedProcedure
@@ -32,9 +31,7 @@ const organizationRouter = createTRPCRouter({
         });
       }
 
-      const createdOrganization = await auth(
-        getRequestContext().env as Env,
-      ).api.createOrganization({
+      const createdOrganization = await auth.api.createOrganization({
         headers: ctx.headers,
         body: {
           name: input.organizationName,
@@ -79,7 +76,7 @@ const organizationRouter = createTRPCRouter({
       const createdMemberToPermissionGroups = ctx.db
         .insert(memberToPermissionGroups)
         .values({
-          memberId: addedMember.id!,
+          memberId: addedMember.id,
           permissionGroupId: adminRole.id,
         });
 
@@ -123,9 +120,7 @@ const organizationRouter = createTRPCRouter({
     }),
 
   deleteOrganization: organizationProcedure.mutation(async ({ ctx }) => {
-    const deletedOrganization = await auth(
-      getRequestContext().env as Env,
-    ).api.deleteOrganization({
+    const deletedOrganization = await auth.api.deleteOrganization({
       headers: ctx.headers,
       body: {
         organizationId: ctx.organizationId,

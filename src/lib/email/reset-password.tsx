@@ -71,6 +71,8 @@ function ResetPasswordEmail({
 export async function reactResetPasswordEmail(
   props: BetterAuthResetPasswordEmailProps,
 ) {
-  const ReactDOMServer = (await import("react-dom/server")).default;
-  return ReactDOMServer.renderToStaticMarkup(<ResetPasswordEmail {...props} />);
+  // TODO - create MIME email
+  // const ReactDOMServer = (await import("react-dom/server")).default;
+  // return ReactDOMServer.renderToStaticMarkup(<ResetPasswordEmail {...props} />);
+  return "reactResetPasswordEmail";
 }

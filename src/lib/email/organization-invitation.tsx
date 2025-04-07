@@ -104,6 +104,8 @@ export const InviteUserEmail = ({
 export async function reactInvitationEmail(
   props: BetterAuthInviteUserEmailProps,
 ) {
-  const ReactDOMServer = (await import("react-dom/server")).default;
-  return ReactDOMServer.renderToStaticMarkup(<InviteUserEmail {...props} />);
+  // TODO - create MIME email
+  // const ReactDOMServer = (await import("react-dom/server")).default;
+  // return ReactDOMServer.renderToStaticMarkup(<InviteUserEmail {...props} />);
+  return "reactInvitationEmail";
 }

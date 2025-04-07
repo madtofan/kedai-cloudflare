@@ -1,14 +1,13 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "~/lib/auth";
-import { getRequestContext } from "@cloudflare/next-on-pages";
 
 export default async function Page({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth(getRequestContext().env as Env).api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (session) {

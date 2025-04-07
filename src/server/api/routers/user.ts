@@ -7,7 +7,6 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { memberToPermissionGroups } from "../../db/schema";
 import { auth } from "~/lib/auth";
-import { getRequestContext } from "@cloudflare/next-on-pages";
 
 const userRouter = createTRPCRouter({
   getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
@@ -24,7 +23,7 @@ const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await auth(getRequestContext().env as Env).api.createInvitation({
+      await auth.api.createInvitation({
         headers: ctx.headers,
         body: {
           email: input.email,
@@ -42,7 +41,7 @@ const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await auth(getRequestContext().env as Env).api.removeMember({
+      await auth.api.removeMember({
         headers: ctx.headers,
         body: {
           memberIdOrEmail: input.userId,
@@ -93,9 +92,7 @@ const userRouter = createTRPCRouter({
             "User must not be in an existing organization to accept another one.",
         });
       }
-      const acceptedInvitation = await auth(
-        getRequestContext().env as Env,
-      ).api.acceptInvitation({
+      const acceptedInvitation = await auth.api.acceptInvitation({
         headers: ctx.headers,
         body: {
           invitationId: input.invitationId,
@@ -124,7 +121,7 @@ const userRouter = createTRPCRouter({
         });
       const valuesToInsert = defaultPermissionGroups.map(
         (defaultPermission) => ({
-          memberId: acceptedInvitation.member.id!,
+          memberId: acceptedInvitation.member.id,
           permissionGroupId: defaultPermission.id,
         }),
       );
@@ -139,7 +136,7 @@ const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await auth(getRequestContext().env as Env).api.rejectInvitation({
+      await auth.api.rejectInvitation({
         headers: ctx.headers,
         body: {
           invitationId: input.invitationId,
@@ -149,9 +146,7 @@ const userRouter = createTRPCRouter({
     }),
 
   leaveOrganization: organizationProcedure.mutation(async ({ ctx }) => {
-    const removedUser = await auth(
-      getRequestContext().env as Env,
-    ).api.removeMember({
+    const removedUser = await auth.api.removeMember({
       headers: ctx.headers,
       body: {
         memberIdOrEmail: ctx.user.id,

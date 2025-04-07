@@ -4,7 +4,6 @@ import { ZodError } from "zod";
 
 import { db } from "../db";
 import { auth } from "~/lib/auth";
-import { getRequestContext } from "@cloudflare/next-on-pages";
 
 /**
  * 1. CONTEXT
@@ -99,9 +98,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  * This guarantees that the user has logged in, and the userId can be obtained from ctx.user.userId
  */
 export const protectedProcedure = publicProcedure.use(async (opts) => {
-  const clientSession = await auth(
-    getRequestContext().env as Env,
-  ).api.getSession({
+  const clientSession = await auth.api.getSession({
     headers: opts.ctx.headers,
   });
   if (!clientSession) {
@@ -151,7 +148,7 @@ export const organizationProcedure = protectedProcedure.use(async (opts) => {
       });
     }
 
-    await auth(getRequestContext().env as Env).api.setActiveOrganization({
+    await auth.api.setActiveOrganization({
       headers: opts.ctx.headers,
       body: {
         organizationId,

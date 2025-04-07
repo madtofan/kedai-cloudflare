@@ -1,8 +1,7 @@
 "server-only";
 
 import { betterFetch } from "@better-fetch/fetch";
-import { getRequestContext } from "@cloudflare/next-on-pages";
-import { env } from "~/env";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export function sendEmail({
   to,
@@ -13,7 +12,9 @@ export function sendEmail({
   subject: string;
   html: string;
 }) {
-  getRequestContext().ctx.waitUntil(
+  const { ctx, env } = getCloudflareContext();
+
+  ctx.waitUntil(
     betterFetch<{ success: boolean; messageId: string; message: string }>(
       env.EMAIL_API_ENDPOINT,
       {

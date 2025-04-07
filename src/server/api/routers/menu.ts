@@ -12,7 +12,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3 } from "../s3";
 import { nanoid } from "nanoid";
-import { env } from "~/env";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 const menuRouter = createTRPCRouter({
   getMenu: organizationProcedure.query(async ({ ctx }) => {
@@ -72,6 +72,7 @@ const menuRouter = createTRPCRouter({
             message: "Image type not supported.",
           });
         }
+        const { env } = getCloudflareContext();
         const objectKey = `${env.NODE_ENV}/${ctx.organizationId}/${nanoid()}`;
         const cmd = new PutObjectCommand({
           Bucket: env.CLOUDFLARE_R2_BUCKET_NAME,

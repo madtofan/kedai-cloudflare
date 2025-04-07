@@ -22,6 +22,9 @@ import {
 } from "~/components/ui/popover";
 import { Input } from "~/components/ui/input";
 import { useToast } from "~/hooks/use-toast";
+import { type RouterOutputs } from "~/server/api/root";
+
+type MenuType = RouterOutputs["menu"]["getMenu"][0];
 
 export default function DashboardMenuGroupPage() {
   const { toast } = useToast();
@@ -39,7 +42,16 @@ export default function DashboardMenuGroupPage() {
     if (!menus) {
       return {};
     }
-    return Object.groupBy(menus, (menu) => menu.menuGroups?.id ?? "");
+    return menus.reduce<Record<string, MenuType[]>>(
+      (accumulatedMenus, menu) => {
+        const key = menu.menuGroups?.id ?? "";
+        return {
+          ...accumulatedMenus,
+          [key]: [...(accumulatedMenus[key] ?? []), menu],
+        };
+      },
+      {},
+    );
   }, [menus]);
 
   const { mutateAsync: addMenuGroup } =
