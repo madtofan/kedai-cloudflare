@@ -7,6 +7,13 @@ initOpenNextCloudflareForDev();
 
 // /** @type {import("next").NextConfig} */
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        hostname: "kedai-images.madtofan.win",
+      },
+    ],
+  },
   async headers() {
     return [
       {

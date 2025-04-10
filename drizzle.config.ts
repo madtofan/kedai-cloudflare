@@ -1,4 +1,6 @@
 import { defineConfig } from "drizzle-kit";
+// import path from "path";
+// import fs from "fs";
 
 import fs from "fs";
 import path from "path";

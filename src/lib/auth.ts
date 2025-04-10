@@ -1,9 +1,8 @@
 import { betterAuth } from "better-auth";
-import { organization } from "better-auth/plugins";
+import { oneTap, organization } from "better-auth/plugins";
 import { reactInvitationEmail } from "./email/organization-invitation";
 import { sendEmail } from "./send-email";
 import { db } from "./db";
-import { oneTap } from "./onetap";
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,

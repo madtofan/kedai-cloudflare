@@ -80,7 +80,7 @@ export default function NewMenuGroupPage() {
       .finally(() => setLoading(false));
   };
 
-  const handleDeleteMenuGroup = (menuGroupId: number) => {
+  const handleDeleteMenuGroup = (menuGroupId: string) => {
     const groupsToDelete = menuGroups?.find(
       (group) => group.id === menuGroupId,
     );

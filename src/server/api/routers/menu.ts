@@ -38,7 +38,7 @@ const menuRouter = createTRPCRouter({
   addMenu: organizationProcedure
     .input(
       z.object({
-        menuGroupId: z.number().int(),
+        menuGroupId: z.string(),
         name: z.string().trim().min(1).max(256),
         description: z.string().trim().max(256).optional(),
         image: z
@@ -136,22 +136,65 @@ const menuRouter = createTRPCRouter({
       z.object({
         id: z.number().int(),
         name: z.string().trim().min(1).max(256),
+        menuGroupId: z.string(),
+        image: z
+          .object({
+            fileSize: z.number(),
+            fileType: z.string(),
+          })
+          .optional(),
         description: z.string().trim().max(256).optional(),
-        image: z.string().trim().url().max(256).optional(),
         sale: z.number(),
         cost: z.number(),
+        stores: z.array(z.string()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const menuOrganizationId = (
-        await ctx.db.query.menus.findFirst({
-          columns: {
-            organizationId: true,
+      let image = null;
+      let preSignedUrl = null;
+      if (input.image) {
+        const sizeLimit = 1 * 1024 ** 2; // 1MB
+        if (input.image.fileSize > sizeLimit) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Image size too big.",
+          });
+        }
+        if (
+          input.image.fileType !== "image/jpeg" &&
+          input.image.fileType !== "image/png"
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Image type not supported.",
+          });
+        }
+        const { env } = getCloudflareContext();
+        const objectKey = `${env.NODE_ENV}/${ctx.organizationId}/${nanoid()}`;
+        const cmd = new PutObjectCommand({
+          Bucket: env.CLOUDFLARE_R2_BUCKET_NAME,
+          Key: objectKey,
+          ContentLength: input.image.fileSize,
+          ContentType: input.image.fileType,
+        });
+        preSignedUrl = await getSignedUrl(S3, cmd, { expiresIn: 3600 });
+        image = `${env.CLOUDFLARE_IMAGE_BASE_PATH}/${objectKey}`;
+      }
+
+      const menuToUpdate = await ctx.db.query.menus.findFirst({
+        columns: {
+          organizationId: true,
+        },
+        with: {
+          menuDetails: {
+            columns: {
+              image: true,
+            },
           },
-          where: (menu, { eq }) => eq(menu.id, input.id),
-        })
-      )?.organizationId;
-      if (menuOrganizationId !== ctx.organizationId) {
+        },
+        where: (menu, { eq }) => eq(menu.id, input.id),
+      });
+      if (menuToUpdate && menuToUpdate.organizationId !== ctx.organizationId) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Menu does not originate from this organization.",
@@ -163,7 +206,7 @@ const menuRouter = createTRPCRouter({
           .values({
             name: input.name,
             description: input.description,
-            image: input.image,
+            image: image ?? menuToUpdate?.menuDetails.image,
             sale: input.sale,
             cost: input.cost,
           })
@@ -180,6 +223,7 @@ const menuRouter = createTRPCRouter({
         .update(menus)
         .set({
           menuDetailsId: menuDetail.id,
+          menuGroupId: input.menuGroupId,
         })
         .where(eq(menus.id, input.id))
         .returning();
@@ -189,7 +233,15 @@ const menuRouter = createTRPCRouter({
           message: "Failed to update menu.",
         });
       }
-      return { sucess: true };
+      await ctx.db.delete(storeMenus).where(eq(storeMenus.menuId, input.id));
+      if (input.stores && input.stores.length > 0) {
+        const values = input.stores.map((store) => ({
+          storeId: store,
+          menuId: input.id,
+        }));
+        await ctx.db.insert(storeMenus).values(values);
+      }
+      return preSignedUrl;
     }),
 
   deleteMenu: organizationProcedure

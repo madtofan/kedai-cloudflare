@@ -84,7 +84,7 @@ export default function DashboardMenuGroupPage() {
       });
   };
 
-  const handleDeleteMenuGroup = (menuGroupId: number) => {
+  const handleDeleteMenuGroup = (menuGroupId: string) => {
     const menuGroupToDelete = menuGroups?.find(
       (group) => group.id === menuGroupId,
     );

@@ -1,7 +1,6 @@
 import { createAuthClient } from "better-auth/react";
-import { organizationClient } from "better-auth/client/plugins";
+import { oneTapClient, organizationClient } from "better-auth/client/plugins";
 import { toast } from "~/hooks/use-toast";
-import { oneTapClient } from "./onetap/client";
 
 export const client = createAuthClient({
   plugins: [

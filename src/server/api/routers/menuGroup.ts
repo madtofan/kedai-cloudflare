@@ -29,7 +29,7 @@ const menuGroupRouter = createTRPCRouter({
   editMenuGroup: organizationProcedure
     .input(
       z.object({
-        id: z.number().int(),
+        id: z.string(),
         name: z.string().trim().min(1).max(256),
       }),
     )
@@ -56,7 +56,7 @@ const menuGroupRouter = createTRPCRouter({
     }),
 
   deleteMenuGroup: organizationProcedure
-    .input(z.object({ id: z.number().int() }))
+    .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const deletedMenuGroup = await ctx.db
         .delete(menuGroups)

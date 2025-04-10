@@ -222,9 +222,7 @@ export const permissionGroups = createTable(
       () => new Date(),
     ),
   },
-  (example) => ({
-    organizationIndex: index("roleOrganizationIdx").on(example.organizationId),
-  }),
+  (example) => [index("roleOrganizationIdx").on(example.organizationId)],
 );
 export const permissionGroupsRelations = relations(
   permissionGroups,
@@ -305,10 +303,10 @@ export const stores = createTable(
       () => new Date(),
     ),
   },
-  (example) => ({
-    organizationIndex: index("storeOrganizationIdx").on(example.organizationId),
-    slugIndex: unique().on(example.organizationId, example.slug),
-  }),
+  (example) => [
+    index("storeOrganizationIdx").on(example.organizationId),
+    unique().on(example.organizationId, example.slug),
+  ],
 );
 export const storesRelations = relations(stores, ({ one, many }) => ({
   organization: one(organization, {
@@ -322,7 +320,7 @@ export const storesRelations = relations(stores, ({ one, many }) => ({
 export const menuGroups = createTable(
   "menuGroups",
   {
-    id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+    id: text("id").$default(generatePublicId).primaryKey(),
     name: text("name").notNull(),
     organizationId: text("organizationId")
       .references(() => organization.id, { onDelete: "cascade" })
@@ -334,11 +332,7 @@ export const menuGroups = createTable(
       () => new Date(),
     ),
   },
-  (example) => ({
-    organizationIndex: index("menuGroupOrganizationIdx").on(
-      example.organizationId,
-    ),
-  }),
+  (example) => [index("menuGroupOrganizationIdx").on(example.organizationId)],
 );
 export const menuGroupsRelations = relations(menuGroups, ({ one, many }) => ({
   organization: one(organization, {
@@ -348,26 +342,20 @@ export const menuGroupsRelations = relations(menuGroups, ({ one, many }) => ({
   menus: many(menus),
 }));
 
-export const menuDetails = createTable(
-  "menuDetails",
-  {
-    id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    name: text("name").notNull(),
-    description: text("description"),
-    image: text("image"),
-    sale: real("sale").notNull(),
-    cost: real("cost").notNull(),
-    createdAt: integer("createdAt", { mode: "timestamp" })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).$onUpdate(
-      () => new Date(),
-    ),
-  },
-  (example) => ({
-    nameIndex: index("menuNameIndex").on(example.name),
-  }),
-);
+export const menuDetails = createTable("menuDetails", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  description: text("description"),
+  image: text("image"),
+  sale: real("sale").notNull(),
+  cost: real("cost").notNull(),
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .default(sql`(unixepoch())`)
+    .notNull(),
+  updatedAt: integer("updatedAt", { mode: "timestamp" }).$onUpdate(
+    () => new Date(),
+  ),
+});
 export const menuDetailsRelations = relations(menuDetails, ({ many }) => ({
   menuToMenuDetails: many(menuToMenuDetails),
 }));
@@ -389,9 +377,7 @@ export const storeMenus = createTable(
       () => new Date(),
     ),
   },
-  (example) => ({
-    storeIndex: index("menuStoreIdx").on(example.storeId),
-  }),
+  (example) => [index("menuStoreIdx").on(example.storeId)],
 );
 export const storeMenusRelations = relations(storeMenus, ({ one }) => ({
   store: one(stores, {
@@ -408,7 +394,7 @@ export const menus = createTable(
   "menus",
   {
     id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    menuGroupId: integer("menuGroupId").references(() => menuGroups.id, {
+    menuGroupId: text("menuGroupId").references(() => menuGroups.id, {
       onDelete: "set null",
     }),
     organizationId: text("organizationId")
@@ -426,10 +412,7 @@ export const menus = createTable(
       () => new Date(),
     ),
   },
-  (example) => ({
-    organizationIndex: index("menuOrganizationIdx").on(example.organizationId),
-    menuGroupIndex: index("menuGroupIdx").on(example.menuGroupId),
-  }),
+  (example) => [index("menuOrganizationIdx").on(example.organizationId)],
 );
 export const menusRelations = relations(menus, ({ one, many }) => ({
   menuGroups: one(menuGroups, {
@@ -490,9 +473,7 @@ export const payments = createTable(
     value: real("value"),
     remarks: text("remarks"),
   },
-  (example) => ({
-    storeIndex: index("paymentStoreIdx").on(example.storeId),
-  }),
+  (example) => [index("paymentStoreIdx").on(example.storeId)],
 );
 export const paymentsRelations = relations(payments, ({ one, many }) => ({
   stores: one(stores, {
@@ -520,9 +501,7 @@ export const orders = createTable(
       () => new Date(),
     ),
   },
-  (example) => ({
-    storeIndex: index("orderStoreIdx").on(example.storeId),
-  }),
+  (example) => [index("orderStoreIdx").on(example.storeId)],
 );
 export const ordersRelations = relations(orders, ({ one, many }) => ({
   stores: one(stores, {
@@ -553,9 +532,7 @@ export const orderItems = createTable(
       () => new Date(),
     ),
   },
-  (example) => ({
-    orderIndex: index("itemOrderIdx").on(example.orderId),
-  }),
+  (example) => [index("itemOrderIdx").on(example.orderId)],
 );
 export const orderItemsRelations = relations(orderItems, ({ one }) => ({
   order: one(orders, {

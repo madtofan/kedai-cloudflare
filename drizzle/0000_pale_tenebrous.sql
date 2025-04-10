@@ -68,8 +68,9 @@ CREATE TABLE `menuDetails` (
 	`updatedAt` integer
 );
 --> statement-breakpoint
+CREATE INDEX `menuNameIndex` ON `menuDetails` (`name`);--> statement-breakpoint
 CREATE TABLE `menuGroups` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`organizationId` text NOT NULL,
 	`createdAt` integer DEFAULT (unixepoch()) NOT NULL,
@@ -77,6 +78,7 @@ CREATE TABLE `menuGroups` (
 	FOREIGN KEY (`organizationId`) REFERENCES `organization`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE INDEX `menuGroupOrganizationIdx` ON `menuGroups` (`organizationId`);--> statement-breakpoint
 CREATE TABLE `menuToMenuDetails` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`menuId` integer NOT NULL,
@@ -89,7 +91,7 @@ CREATE TABLE `menuToMenuDetails` (
 --> statement-breakpoint
 CREATE TABLE `menus` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`menuGroupId` integer,
+	`menuGroupId` text,
 	`organizationId` text NOT NULL,
 	`menuDetailsId` integer NOT NULL,
 	`createdAt` integer DEFAULT (unixepoch()) NOT NULL,
@@ -99,6 +101,8 @@ CREATE TABLE `menus` (
 	FOREIGN KEY (`menuDetailsId`) REFERENCES `menuDetails`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
+CREATE INDEX `menuOrganizationIdx` ON `menus` (`organizationId`);--> statement-breakpoint
+CREATE INDEX `menuGroupIdx` ON `menus` (`menuGroupId`);--> statement-breakpoint
 CREATE TABLE `orderItems` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`orderId` integer NOT NULL,
@@ -110,6 +114,7 @@ CREATE TABLE `orderItems` (
 	FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE INDEX `itemOrderIdx` ON `orderItems` (`orderId`);--> statement-breakpoint
 CREATE TABLE `orders` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`storeId` text NOT NULL,
@@ -123,6 +128,7 @@ CREATE TABLE `orders` (
 	FOREIGN KEY (`paymentId`) REFERENCES `payments`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE INDEX `orderStoreIdx` ON `orders` (`storeId`);--> statement-breakpoint
 CREATE TABLE `organization` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
@@ -132,6 +138,7 @@ CREATE TABLE `organization` (
 	`metadata` text
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `organization_slug_unique` ON `organization` (`slug`);--> statement-breakpoint
 CREATE TABLE `payments` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`storeId` text NOT NULL,
@@ -140,6 +147,7 @@ CREATE TABLE `payments` (
 	FOREIGN KEY (`storeId`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE INDEX `paymentStoreIdx` ON `payments` (`storeId`);--> statement-breakpoint
 CREATE TABLE `permissionGroups` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
@@ -152,6 +160,7 @@ CREATE TABLE `permissionGroups` (
 	FOREIGN KEY (`organizationId`) REFERENCES `organization`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE INDEX `roleOrganizationIdx` ON `permissionGroups` (`organizationId`);--> statement-breakpoint
 CREATE TABLE `permissions` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
@@ -159,6 +168,7 @@ CREATE TABLE `permissions` (
 	`updatedAt` integer
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `permissions_name_unique` ON `permissions` (`name`);--> statement-breakpoint
 CREATE TABLE `session` (
 	`id` text PRIMARY KEY NOT NULL,
 	`expiresAt` integer NOT NULL,
@@ -172,6 +182,7 @@ CREATE TABLE `session` (
 	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `session_token_unique` ON `session` (`token`);--> statement-breakpoint
 CREATE TABLE `storeMenus` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`storeId` text NOT NULL,
@@ -182,6 +193,7 @@ CREATE TABLE `storeMenus` (
 	FOREIGN KEY (`menuId`) REFERENCES `menus`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE INDEX `menuStoreIdx` ON `storeMenus` (`storeId`);--> statement-breakpoint
 CREATE TABLE `stores` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
@@ -193,6 +205,8 @@ CREATE TABLE `stores` (
 	FOREIGN KEY (`organizationId`) REFERENCES `organization`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE INDEX `storeOrganizationIdx` ON `stores` (`organizationId`);--> statement-breakpoint
+CREATE UNIQUE INDEX `stores_organizationId_slug_unique` ON `stores` (`organizationId`,`slug`);--> statement-breakpoint
 CREATE TABLE `user` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
@@ -203,6 +217,7 @@ CREATE TABLE `user` (
 	`updatedAt` integer DEFAULT (unixepoch()) NOT NULL
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
 CREATE TABLE `verification` (
 	`id` text PRIMARY KEY NOT NULL,
 	`identifier` text NOT NULL,
@@ -211,19 +226,3 @@ CREATE TABLE `verification` (
 	`createdAt` integer DEFAULT (unixepoch()),
 	`updatedAt` integer DEFAULT (unixepoch())
 );
---> statement-breakpoint
-CREATE INDEX `menuNameIndex` ON `menuDetails` (`name`);--> statement-breakpoint
-CREATE INDEX `menuGroupOrganizationIdx` ON `menuGroups` (`organizationId`);--> statement-breakpoint
-CREATE INDEX `menuOrganizationIdx` ON `menus` (`organizationId`);--> statement-breakpoint
-CREATE INDEX `menuGroupIdx` ON `menus` (`menuGroupId`);--> statement-breakpoint
-CREATE INDEX `itemOrderIdx` ON `orderItems` (`orderId`);--> statement-breakpoint
-CREATE INDEX `orderStoreIdx` ON `orders` (`storeId`);--> statement-breakpoint
-CREATE UNIQUE INDEX `organization_slug_unique` ON `organization` (`slug`);--> statement-breakpoint
-CREATE INDEX `paymentStoreIdx` ON `payments` (`storeId`);--> statement-breakpoint
-CREATE INDEX `roleOrganizationIdx` ON `permissionGroups` (`organizationId`);--> statement-breakpoint
-CREATE UNIQUE INDEX `permissions_name_unique` ON `permissions` (`name`);--> statement-breakpoint
-CREATE UNIQUE INDEX `session_token_unique` ON `session` (`token`);--> statement-breakpoint
-CREATE INDEX `menuStoreIdx` ON `storeMenus` (`storeId`);--> statement-breakpoint
-CREATE INDEX `storeOrganizationIdx` ON `stores` (`organizationId`);--> statement-breakpoint
-CREATE UNIQUE INDEX `stores_organizationId_slug_unique` ON `stores` (`organizationId`,`slug`);--> statement-breakpoint
-CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);
